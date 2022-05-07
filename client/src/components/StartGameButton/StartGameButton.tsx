@@ -70,9 +70,11 @@ const StartGameButton: FunctionComponent<StartGameButtonProps> = () => {
       {gameMenu}
       <Button 
         variant="contained"
-        color={Boolean(gameMenu) ? "error" : "primary"}
         size="large"
-        sx={{width: 300, height: 60}}
+        color={Boolean(gameMenu) ? "error" : "primary"}
+        sx={{
+          width: 300, height: 60,
+        }}
         onClick={handleClickOpen}
       >
         {Boolean(gameMenu) ? "Закрыть" : "Начать игру"}

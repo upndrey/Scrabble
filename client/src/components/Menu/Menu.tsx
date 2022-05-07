@@ -30,9 +30,15 @@ export default function Menu() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+      <AppBar 
+        position="static"
+        sx={{
+        }}
+      >
         <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          <Typography variant="h4" component="div" sx={{ 
+            flexGrow: 1,
+            }}>
             Scrabble
           </Typography>
           <Button color="inherit">Правила</Button>
