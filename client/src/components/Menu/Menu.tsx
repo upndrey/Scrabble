@@ -6,8 +6,22 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import MenuIcon from '@mui/icons-material/Menu';
 import UserMenu from '../UserMenu/UserMenu';
+import { styled } from '@mui/system';
 
-export default function Menu() {
+
+const ActiveButton = styled(Button)(
+  ({ theme }) => `
+    background-color: ${theme.palette.primary.dark};
+  `,
+);
+
+interface MenuProps {
+  isFriendsOpen: boolean,
+  openFriends: Function
+}
+ 
+const Menu: React.FunctionComponent<MenuProps> = (props) => {
+  const {isFriendsOpen, openFriends} = props;
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [login, setLogin] = React.useState<null | string>(null);
 
@@ -15,7 +29,9 @@ export default function Menu() {
     setLogin('username');
   };
 
-  
+  const handleFriendsOpen = () => {
+    openFriends(!isFriendsOpen);
+  }
 
   const renderLoginMenu = () => {
     if(login) {
@@ -28,6 +44,32 @@ export default function Menu() {
     }
   }
 
+  const friendsButton = () => {
+    if(isFriendsOpen) 
+      return (
+        <ActiveButton 
+          color="inherit"
+          onClick={handleFriendsOpen}
+          sx={{
+            mr:1
+          }}
+        >
+          Друзья
+        </ActiveButton>
+      )
+    else 
+      return (
+        <Button 
+          color="inherit"
+          onClick={handleFriendsOpen}
+          sx={{
+            mr:1
+          }}
+        >
+          Друзья
+        </Button>
+      )
+  }
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar 
@@ -37,11 +79,20 @@ export default function Menu() {
       >
         <Toolbar>
           <Typography variant="h4" component="div" sx={{ 
-            flexGrow: 1,
             }}>
             Scrabble
           </Typography>
-          <Button color="inherit">Правила</Button>
+          <Box
+            sx={{
+              flexGrow: 1,
+              ml:5
+            }}
+          >
+            {friendsButton()}
+            <Button color="inherit">
+              Правила
+            </Button>
+          </Box>
           {renderLoginMenu()}
           
           <Button
@@ -56,3 +107,5 @@ export default function Menu() {
     </Box>
   );
 }
+
+export default Menu;

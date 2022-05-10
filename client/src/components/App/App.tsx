@@ -5,10 +5,11 @@ import StartGameButton from '../StartGameButton/StartGameButton';
 
 
 function App() {
+  const [isFriendsOpen, openFriends] = React.useState<boolean>(true);
   return (
     <div className="App">
-      <Menu></Menu>
-      <FriendsList></FriendsList>
+      <Menu openFriends={openFriends} isFriendsOpen={isFriendsOpen}></Menu>
+      <FriendsList isFriendsOpen={isFriendsOpen}></FriendsList>
       <StartGameButton></StartGameButton>
     </div>
   );

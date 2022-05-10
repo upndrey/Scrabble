@@ -1,6 +1,6 @@
-import { Button, ClickAwayListener, Paper } from "@mui/material";
+import { Button, ClickAwayListener, Paper, Slide } from "@mui/material";
 import { Box } from "@mui/system";
-import { FunctionComponent, ReactNode, useState } from "react";
+import { FunctionComponent, useState } from "react";
 
 interface StartGameButtonProps {
   
@@ -8,76 +8,90 @@ interface StartGameButtonProps {
 
 
 const StartGameButton: FunctionComponent<StartGameButtonProps> = () => {
-  const [gameMenu, setGameMenu] = useState<null | ReactNode>(null);
+  const [isGameMenuStartOpen, startOpenGameMenu] = useState<boolean>(false);
+  const [isGameMenuEndOpen, endOpenGameMenu] = useState<boolean>(false);
+
 
   const handleClickOpen = () => {
-    setGameMenu(renderMenu);
+    startOpenGameMenu(true);
   };
 
   const handleClose = () => {
-    setGameMenu(null);
+    startOpenGameMenu(false);
+    endOpenGameMenu(false);
   };
-
   const renderMenu = (
-    <ClickAwayListener onClickAway={handleClose}>
-      <Paper
-        sx={{
-          display:'flex', 
-          flexDirection:'column',
-          padding:1,
-          boxSizing:'border-box',
-          width:300,
-          mb:1
+      <Slide 
+        direction="left" 
+        in={isGameMenuStartOpen} 
+        addEndListener={() => {
+          if(isGameMenuStartOpen)
+            setTimeout(endOpenGameMenu.bind(this, true), 10);
         }}
       >
-        <Button 
-          variant="contained"
-          size="medium"
+        <Paper
           sx={{
+            display:'flex', 
+            flexDirection:'column',
+            padding:1,
+            boxSizing:'border-box',
+            width:300,
             mb:1
           }}
-          onClick={handleClose}
         >
-          Своя игра
-        </Button>
-        <Button 
-          variant="contained"
-          size="medium"
-          sx={{
-            mb:1
-          }}
-          onClick={handleClose}
-        >
-          Быстрый поиск
-        </Button>
-        <Button 
-          variant="contained"
-          size="medium"
-          disabled
-          onClick={handleClose}
-        >
-          Рейтинговая игра
-        </Button>
-      </Paper>
-    </ClickAwayListener>
+          <Button 
+            variant="contained"
+            size="medium"
+            sx={{
+              mb:1
+            }}
+            onClick={isGameMenuEndOpen ? handleClose : () => {}}
+          >
+            Своя игра
+          </Button>
+          <Button 
+            variant="contained"
+            size="medium"
+            sx={{
+              mb:1
+            }}
+            onClick={isGameMenuEndOpen ? handleClose : () => {}}
+          >
+            Быстрый поиск
+          </Button>
+          <Button 
+            variant="contained"
+            size="medium"
+            disabled
+            onClick={isGameMenuEndOpen ? handleClose : () => {}}
+          >
+            Рейтинговая игра
+          </Button>
+        </Paper>
+      </Slide>
   );
+
+  const renderActiveMenu = (
+    <ClickAwayListener onClickAway={isGameMenuEndOpen ? handleClose : () => {}}>{renderMenu}</ClickAwayListener>
+  )
 
   return (
     <Box 
       id="startGameButton"
       sx={{position: 'fixed', right: 10, bottom: 10}}
     >
-      {gameMenu}
+      {/* {isGameMenuOpen ? renderActiveMenu : renderActiveMenu} */}
+      {renderActiveMenu}
       <Button 
         variant="contained"
         size="large"
-        color={Boolean(gameMenu) ? "error" : "primary"}
+        color={isGameMenuStartOpen ? "error" : "primary"}
         sx={{
           width: 300, height: 60,
         }}
         onClick={handleClickOpen}
       >
-        {Boolean(gameMenu) ? "Закрыть" : "Начать игру"}
+        {isGameMenuStartOpen ? "Закрыть" : "Начать игру"}
       </Button>
     </Box>
   );
