@@ -3,6 +3,7 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import * as http from 'http';
 import cors from 'cors';
+import './models/db';
 
 const app = express();
 

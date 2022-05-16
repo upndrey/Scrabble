@@ -79,6 +79,7 @@ const Menu: React.FunctionComponent<MenuProps> = (props) => {
       >
         <Toolbar>
           <Typography variant="h4" component="div" sx={{ 
+             userSelect: "none"
             }}>
             Scrabble
           </Typography>

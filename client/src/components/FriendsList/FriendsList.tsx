@@ -16,6 +16,8 @@ const FriendsList: FunctionComponent<FriendsListProps> = (props) => {
           maxWidth: 360,
           mt: 3,
           backgroundColor: 'primary.main',
+          zIndex: 999,
+          position: 'relative'
           }}
       >
         <Typography 
