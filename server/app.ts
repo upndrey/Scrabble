@@ -7,8 +7,8 @@ import { associate } from "./db/associations";
 import { init } from "./db/init";
 
 // db
-associate();
-init();
+// associate();
+// init();
 
 const app = express();
 
