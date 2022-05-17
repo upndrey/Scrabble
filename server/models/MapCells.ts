@@ -20,7 +20,7 @@ MapCells.init({
     allowNull: false,
   },
   cell_modifier_id: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     allowNull: false,
   },
   row: {

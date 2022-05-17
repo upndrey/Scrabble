@@ -9,7 +9,7 @@ class Friends extends Model {
 Friends.init({
   user_id: {
     type: DataTypes.INTEGER,
-    primaryKey: true
+    allowNull: false
   },
   friend_id: {
     type: DataTypes.INTEGER,

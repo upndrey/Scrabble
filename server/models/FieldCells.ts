@@ -20,7 +20,7 @@ FieldCells.init({
     allowNull: false,
   },
   symbol_id: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     allowNull: false,
   },
   row: {

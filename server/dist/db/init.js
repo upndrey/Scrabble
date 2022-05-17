@@ -1,0 +1,20 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.init = void 0;
+const models_1 = require("./models");
+const init = async function () {
+    await models_1.Friends.sync({ alter: true });
+    await models_1.Users.sync({ alter: true });
+    await models_1.Players.sync({ alter: true });
+    await models_1.Lobbies.sync({ alter: true });
+    await models_1.Games.sync({ alter: true });
+    await models_1.Fields.sync({ alter: true });
+    await models_1.Maps.sync({ alter: true });
+    await models_1.Sets.sync({ alter: true });
+    await models_1.FieldCells.sync({ alter: true });
+    await models_1.Symbols.sync({ alter: true });
+    await models_1.MapCells.sync({ alter: true });
+    await models_1.CellModifiers.sync({ alter: true });
+};
+exports.init = init;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5pdC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL2RiL2luaXQudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0FBQUEscUNBYWtCO0FBRVgsTUFBTSxJQUFJLEdBQUcsS0FBSztJQUN2QixNQUFNLGdCQUFPLENBQUMsSUFBSSxDQUFDLEVBQUUsS0FBSyxFQUFFLElBQUksRUFBRSxDQUFDLENBQUM7SUFDcEMsTUFBTSxjQUFLLENBQUMsSUFBSSxDQUFDLEVBQUUsS0FBSyxFQUFFLElBQUksRUFBRSxDQUFDLENBQUM7SUFDbEMsTUFBTSxnQkFBTyxDQUFDLElBQUksQ0FBQyxFQUFFLEtBQUssRUFBRSxJQUFJLEVBQUUsQ0FBQyxDQUFDO0lBQ3BDLE1BQU0sZ0JBQU8sQ0FBQyxJQUFJLENBQUMsRUFBRSxLQUFLLEVBQUUsSUFBSSxFQUFFLENBQUMsQ0FBQztJQUNwQyxNQUFNLGNBQUssQ0FBQyxJQUFJLENBQUMsRUFBRSxLQUFLLEVBQUUsSUFBSSxFQUFFLENBQUMsQ0FBQztJQUNsQyxNQUFNLGVBQU0sQ0FBQyxJQUFJLENBQUMsRUFBRSxLQUFLLEVBQUUsSUFBSSxFQUFFLENBQUMsQ0FBQztJQUNuQyxNQUFNLGFBQUksQ0FBQyxJQUFJLENBQUMsRUFBRSxLQUFLLEVBQUUsSUFBSSxFQUFFLENBQUMsQ0FBQztJQUNqQyxNQUFNLGFBQUksQ0FBQyxJQUFJLENBQUMsRUFBRSxLQUFLLEVBQUUsSUFBSSxFQUFFLENBQUMsQ0FBQztJQUNqQyxNQUFNLG1CQUFVLENBQUMsSUFBSSxDQUFDLEVBQUUsS0FBSyxFQUFFLElBQUksRUFBRSxDQUFDLENBQUM7SUFDdkMsTUFBTSxnQkFBTyxDQUFDLElBQUksQ0FBQyxFQUFFLEtBQUssRUFBRSxJQUFJLEVBQUUsQ0FBQyxDQUFDO0lBQ3BDLE1BQU0saUJBQVEsQ0FBQyxJQUFJLENBQUMsRUFBRSxLQUFLLEVBQUUsSUFBSSxFQUFFLENBQUMsQ0FBQztJQUNyQyxNQUFNLHNCQUFhLENBQUMsSUFBSSxDQUFDLEVBQUUsS0FBSyxFQUFFLElBQUksRUFBRSxDQUFDLENBQUM7QUFDNUMsQ0FBQyxDQUFBO0FBYlksUUFBQSxJQUFJLFFBYWhCIn0=
