@@ -9,16 +9,19 @@ interface FriendsListProps {
 const FriendsList: FunctionComponent<FriendsListProps> = (props) => {
   const { isFriendsOpen } = props;
   return ( 
-    <Slide direction="right" in={isFriendsOpen}>
+    <Slide direction="right" unmountOnExit  in={isFriendsOpen}>
       <Paper 
         sx={{ 
           width: '100%', 
           maxWidth: 360,
-          mt: 3,
+          marginTop: '30px',
           backgroundColor: 'primary.main',
           zIndex: 999,
-          position: 'relative'
-          }}
+          display: 'inline-block',
+          position: 'relative',
+          mt:1,
+          mr:1,
+        }}
       >
         <Typography 
           variant='h6' 
@@ -30,7 +33,6 @@ const FriendsList: FunctionComponent<FriendsListProps> = (props) => {
           Друзья
         </Typography>
         <Divider sx={{
-          mb:1,
           color: 'primary.contrastText'
         }}/>
         <List 
@@ -50,7 +52,7 @@ const FriendsList: FunctionComponent<FriendsListProps> = (props) => {
               backgroundColor: 'rgba(0,0,0,.3)',
               borderRadius:'25px',
             }
-            }}
+          }}
         >
         {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => {
           const labelId = `checkbox-list-secondary-label-${value}`;

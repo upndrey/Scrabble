@@ -1,11 +1,17 @@
 import { Button, ClickAwayListener, Paper, Slide } from "@mui/material";
 import { Box } from "@mui/system";
 import { FunctionComponent, useState } from "react";
+import { Link } from "react-router-dom";
 
 interface StartGameButtonProps {
   
 }
 
+const linkStyles = {
+  width: '100%',
+  display: 'block',
+  textDecoration: 'none'
+}
 
 const StartGameButton: FunctionComponent<StartGameButtonProps> = () => {
   const [isGameMenuStartOpen, startOpenGameMenu] = useState<boolean>(false);
@@ -39,26 +45,38 @@ const StartGameButton: FunctionComponent<StartGameButtonProps> = () => {
             mb:1
           }}
         >
-          <Button 
-            variant="contained"
-            size="medium"
-            sx={{
-              mb:1
-            }}
-            onClick={isGameMenuEndOpen ? handleClose : () => {}}
+          <Link 
+            to="/lobby"
+            style={linkStyles}
           >
-            Своя игра
-          </Button>
-          <Button 
-            variant="contained"
-            size="medium"
-            sx={{
-              mb:1
-            }}
-            onClick={isGameMenuEndOpen ? handleClose : () => {}}
+            <Button 
+              variant="contained"
+              size="medium"
+              sx={{
+                width: '100%',
+                mb:1
+              }}
+              onClick={isGameMenuEndOpen ? handleClose : () => {}}
+            >
+              Создать игру
+            </Button>
+          </Link>
+          <Link 
+            to="/lobbyList"
+            style={linkStyles}
           >
-            Быстрый поиск
-          </Button>
+            <Button 
+              variant="contained"
+              size="medium"
+              sx={{
+                width: '100%',
+                mb:1
+              }}
+              onClick={isGameMenuEndOpen ? handleClose : () => {}}
+            >
+              Список лобби
+            </Button>
+          </Link>
           <Button 
             variant="contained"
             size="medium"
