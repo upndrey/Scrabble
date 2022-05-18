@@ -1,32 +1,59 @@
 import { Button, Modal, Paper, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { FormEvent, FunctionComponent, useRef, useState } from "react";
+import axios from 'axios';
+axios.defaults.withCredentials = true;
 
 interface SignupProps {
   isSignupOpened: boolean,
-  setSignupOpen: Function
+  setSignupOpen: Function,
+  setLogin: Function
 }
  
 const Signup: FunctionComponent<SignupProps> = (props) => {
-  const [login, setLogin] = useState<string>('');
+  const [login, setLocalLogin] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const {isSignupOpened, setSignupOpen} = props;
+  const {isSignupOpened, setSignupOpen, setLogin} = props;
   const handleSignupClose = () => setSignupOpen(false);
   
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const json = fetch('http://localhost:3000/api/signup', 
-    { 
-      method: 'POST', 
-      body: JSON.stringify({
-        login: login,
-        password: password
-      }),
-      headers: {
-        'Content-Type': 'application/json'
+    // const response = await fetch('http://localhost:3000/api/signup', 
+    // { 
+    //   method: 'POST', 
+    //   body: JSON.stringify({
+    //     login: login,
+    //     credentials: 'same-origin',
+    //     password: password
+    //   }),
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   }
+    // });
+    // if(response.status === 200) {
+    //   setLogin(login);
+    // }
+    // else if(response.status === 422) {
+    //   // TODO
+    // }
+    // else if(response.status === 400) {
+    //   // TODO
+    // }
+    const apiUrl = 'http://localhost:3000/api/signup';
+    axios.post(apiUrl, {
+      login: login,
+      password: password
+    }).then((response) => {
+      if(response.status === 200) {
+        setLogin(login);
       }
-    })
-      .then(res => res.json());
+      else if(response.status === 422) {
+        // TODO
+      }
+      else if(response.status === 400) {
+        // TODO
+      }
+    });
     handleSignupClose();
   };
 
@@ -71,7 +98,7 @@ const Signup: FunctionComponent<SignupProps> = (props) => {
                 type="text"
                 name="login"
                 value={login}
-                onInput={e => setLogin((e.target as HTMLInputElement).value)}
+                onInput={e => setLocalLogin((e.target as HTMLInputElement).value)}
                 label="Введите логин" 
                 sx={{
                   width: '100%',

@@ -1,23 +1,62 @@
-import React, { FormEvent, FunctionComponent, SetStateAction, useRef } from "react";
+import React, { FormEvent, FunctionComponent, SetStateAction, useRef, useState } from "react";
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import { Button, Paper, TextField } from "@mui/material";
 import styled from "styled-components";
+import axios from 'axios';
+axios.defaults.withCredentials = true;
 
 interface LoginProps {
   isLoginOpened: boolean,
-  setLoginOpen: Function
+  setLoginOpen: Function,
+  setLogin: Function
 }
 
  
 const Login: FunctionComponent<LoginProps> = (props) => {
-  const form = useRef<HTMLFormElement>(document.createElement("form"));
-  const {isLoginOpened, setLoginOpen} = props;
+  const [login, setLocalLogin] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const {isLoginOpened, setLoginOpen, setLogin} = props;
   const handleLoginClose = () => setLoginOpen(false);
   
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // const response = await fetch('http://localhost:3000/api/login', { 
+    //   method: 'POST', 
+    //   body: JSON.stringify({
+    //     login: login,
+    //     password: password
+    //   }),
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   }
+    // });
+    // if(response.status === 200) {
+    //   setLogin(login);
+    // }
+    // else if(response.status === 422) {
+    //   // TODO
+    // }
+    // else if(response.status === 400) {
+    //   // TODO
+    // }
+    const apiUrl = 'http://localhost:3000/api/login';
+    axios.post(apiUrl, {
+      login: login,
+      password: password
+    }).then((response) => {
+      if(response.status === 200) {
+        setLogin(login);
+      }
+      else if(response.status === 422) {
+        // TODO
+      }
+      else if(response.status === 400) {
+        // TODO
+      }
+    });
     handleLoginClose();
   };
 
@@ -49,7 +88,7 @@ const Login: FunctionComponent<LoginProps> = (props) => {
           >
             Text in a modal
           </Typography>
-          <form ref={form} onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
             <Box
               sx={{
                 padding: '10px',
@@ -59,6 +98,8 @@ const Login: FunctionComponent<LoginProps> = (props) => {
               }}
             >
               <TextField 
+                value={login}
+                onInput={e => setLocalLogin((e.target as HTMLInputElement).value)}
                 label="Введите логин" 
                 sx={{
                   width: '100%',
@@ -71,6 +112,8 @@ const Login: FunctionComponent<LoginProps> = (props) => {
               />
               <TextField 
                 label="Введите пароль" 
+                value={password}
+                onInput={e => setPassword((e.target as HTMLInputElement).value)}
                 type="password"
                 sx={{
                   width: '100%',

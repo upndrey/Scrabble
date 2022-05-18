@@ -4,6 +4,8 @@ import PersonIcon from '@mui/icons-material/Person';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import React, { FormEvent, FunctionComponent, useRef } from "react";
 import styled from "styled-components";
+import axios from 'axios';
+axios.defaults.withCredentials = true;
 
 interface CreateLobbyProps {
   
@@ -37,11 +39,20 @@ const CreateLobby: FunctionComponent<CreateLobbyProps> = () => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const data = new FormData(form.current)
-    const json = fetch('/api', { method: 'POST', body: data })
-      .then(res => res.json())
-      .then(json => {return json});
-    console.log(json);
+    const apiUrl = 'http://localhost:3000/api/createLobby';
+    axios.post(apiUrl).then((response) => {
+      if(response.status === 200) {
+        const json = response.data;
+        console.log(response.status, json);
+      }
+      else if(response.status === 422) {
+        // TODO
+      }
+      else if(response.status === 400) {
+        // TODO
+      }
+    });
+
   }
 
   return (

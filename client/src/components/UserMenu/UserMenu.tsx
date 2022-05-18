@@ -7,14 +7,28 @@ interface UserMenuProps {
   login: string
   anchorEl: HTMLElement | null
   setAnchorEl: Dispatch<SetStateAction<HTMLElement | null>>
-  setLogin: Dispatch<SetStateAction<string | null>>
+  setLogin: Function
 }
  
 const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
   const {login, anchorEl, setAnchorEl, setLogin} = props;
 
-  const handleLogout = () => {
-    setLogin(null);
+  const handleLogout = async () => {
+    const response = await fetch('http://localhost:3000/api/logout', { 
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    if(response.status === 200) {
+      setLogin("");
+    }
+    else if(response.status === 422) {
+      // TODO
+    }
+    else if(response.status === 400) {
+      // TODO
+    }
     handleMenuClose();
   }
 

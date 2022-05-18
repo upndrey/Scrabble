@@ -19,17 +19,24 @@ interface MenuProps {
   isFriendsOpen: boolean,
   openFriends: Function,
   setLoginOpen: Function,
-  setSignupOpen: Function
+  setSignupOpen: Function,
+  setLogin: Function,
+  login: string
 }
  
 const Menu: React.FunctionComponent<MenuProps> = (props) => {
-  const {isFriendsOpen, openFriends, setLoginOpen, setSignupOpen} = props;
+  const {
+    isFriendsOpen, 
+    openFriends, 
+    setLoginOpen, 
+    setSignupOpen, 
+    setLogin,
+    login
+  } = props;
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const [login, setLogin] = React.useState<null | string>(null);
 
   const handleLogin = () => {
     setLoginOpen(true);
-    // setLogin('username');
   };
 
   const handleSignup = () => {
@@ -41,8 +48,14 @@ const Menu: React.FunctionComponent<MenuProps> = (props) => {
   }
 
   const renderLoginMenu = () => {
-    if(login) {
-      return <UserMenu login={login} anchorEl={anchorEl} setAnchorEl={setAnchorEl} setLogin={setLogin}></UserMenu>
+    console.log(login);
+    if(login !== "") {
+      return <UserMenu 
+        login={login} 
+        anchorEl={anchorEl} 
+        setAnchorEl={setAnchorEl} 
+        setLogin={setLogin}
+      ></UserMenu>
     }
     else {
       return (
