@@ -25,13 +25,16 @@ Lobbies.init({
   },
   is_private: {
     type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: true
+    allowNull: false
   },
   is_closed: {
     type: DataTypes.BOOLEAN,
+    allowNull: false
+  },
+  max_players: {
+    type: DataTypes.INTEGER,
     allowNull: false,
-    defaultValue: true
+    defaultValue: 2
   }
 }, {
   sequelize,

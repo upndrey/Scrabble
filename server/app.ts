@@ -5,20 +5,44 @@ import * as http from 'http';
 import cors from 'cors';
 import { associate } from "./db/associations";
 import { init } from "./db/init";
+import Lobbies from "./models/Lobbies";
+import session from 'express-session';
+const redisStorage = require('connect-redis')(session);
+import redis from 'redis';
+const client = redis.createClient();
 
+const host = '127.0.0.1'
+const port = 3000
 // db
 // associate();
 // init();
 
 const app = express();
 
-// here we are adding middleware to parse all incoming requests as JSON 
+app.use(express.urlencoded());
 app.use(express.json());
-
-// here we are adding middleware to allow cross-origin requests
 app.use(cors());
 
+app.use(
+  session({
+    store: new redisStorage({
+      host: host,
+      port: 6379,
+      client: client,
+    }),
+    secret: 'NwthgxCo',
+    saveUninitialized: true,
+  })
+)
 
+app.post('/api/createLobby', async (req, res) => {
+  await Lobbies.create({});
+});
+
+app.post('/api/signup', async (req, res) => {
+  console.log(req.body);
+  return res.json("test");
+});
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, { 
@@ -32,4 +56,4 @@ io.on("connection", (socket) => {
   console.log('runningMessage');
 });
 
-httpServer.listen(3000);
+httpServer.listen(port);

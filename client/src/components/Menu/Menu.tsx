@@ -17,17 +17,24 @@ const ActiveButton = styled(Button)(
 
 interface MenuProps {
   isFriendsOpen: boolean,
-  openFriends: Function
+  openFriends: Function,
+  setLoginOpen: Function,
+  setSignupOpen: Function
 }
  
 const Menu: React.FunctionComponent<MenuProps> = (props) => {
-  const {isFriendsOpen, openFriends} = props;
+  const {isFriendsOpen, openFriends, setLoginOpen, setSignupOpen} = props;
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [login, setLogin] = React.useState<null | string>(null);
 
   const handleLogin = () => {
-    setLogin('username');
+    setLoginOpen(true);
+    // setLogin('username');
   };
+
+  const handleSignup = () => {
+    setSignupOpen(true);
+  }
 
   const handleFriendsOpen = () => {
     openFriends(!isFriendsOpen);
@@ -39,7 +46,10 @@ const Menu: React.FunctionComponent<MenuProps> = (props) => {
     }
     else {
       return (
-        <Button color="inherit" onClick={handleLogin}>Войти</Button>
+        <>
+          <Button color="inherit" onClick={handleLogin}>Войти</Button>
+          <Button color="inherit" onClick={handleSignup}>Зарегистрироваться</Button>
+        </>
       );
     }
   }
