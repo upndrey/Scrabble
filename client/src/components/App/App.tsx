@@ -17,23 +17,8 @@ function App() {
   const [isLoginOpened, setLoginOpen] = React.useState<boolean>(false);
   const [isSignupOpened, setSignupOpen] = React.useState<boolean>(false);
   const [login, setLogin] = React.useState<string>("");
-  const [appState, setAppState] = React.useState();
+  const [inviteId, setInviteId] = React.useState<string>("");
   
-  // useEffect(() => {
-  //   const apiUrl = 'http://localhost:3000/api/getUser';
-  //   axios.post(apiUrl).then((response) => {
-  //     if(response.status === 200) {
-  //       const json = response.data;
-  //       setLogin(json.login);
-  //     } 
-  //     else if(response.status === 422) {
-  //       // TODO     
-  //     }
-  //     else if(response.status === 400) {
-  //       // TODO
-  //     } 
-  //   });  
-  // }, [setAppState]);
   useEffect(() => {
     const apiUrl = 'http://localhost:3000/api/getUser';
     axios.post(apiUrl).then((response) => {
@@ -49,29 +34,6 @@ function App() {
       }
     });
   }, []);
-
-  // useEffect(() => {
-  //   (async ()=> {
-  //     const response = await fetch('http://localhost:3000/api/getUser', { 
-  //       method: 'POST',
-  //       credentials: 'same-origin',
-  //       headers: {
-  //         'Content-Type': 'application/json'
-  //       }
-  //     });
-  //     if(response.status === 200) {
-  //       const json = await response.json();
-  //       setLogin(json.login);
-  //     }
-  //     else if(response.status === 422) {
-  //       // TODO
-  //     }
-  //     else if(response.status === 400) {
-  //       // TODO
-  //     }
-  //   })();
-  // }, []);
-  
 
   return (
     <div className="App">
@@ -96,8 +58,9 @@ function App() {
       ></Signup>
       <FriendsList isFriendsOpen={isFriendsOpen}></FriendsList>
       <Routes>
-        <Route path='/lobby' element={<CreateLobby />} />
-        <Route path='/lobbyList' element={<LobbyList />} />
+        <Route path='/createLobby' element={login !== "" ? <CreateLobby setInviteId={setInviteId} /> : ""} />
+        <Route path='/lobbyList' element={login !== "" ? <LobbyList /> : ""} />
+        <Route path='/lobby' element={login !== "" ? <Lobby login={login} /> : ""} />
         <Route path="/" element={""} >
         </Route>
       </Routes>

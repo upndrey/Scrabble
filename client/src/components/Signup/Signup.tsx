@@ -18,27 +18,6 @@ const Signup: FunctionComponent<SignupProps> = (props) => {
   
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // const response = await fetch('http://localhost:3000/api/signup', 
-    // { 
-    //   method: 'POST', 
-    //   body: JSON.stringify({
-    //     login: login,
-    //     credentials: 'same-origin',
-    //     password: password
-    //   }),
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   }
-    // });
-    // if(response.status === 200) {
-    //   setLogin(login);
-    // }
-    // else if(response.status === 422) {
-    //   // TODO
-    // }
-    // else if(response.status === 400) {
-    //   // TODO
-    // }
     const apiUrl = 'http://localhost:3000/api/signup';
     axios.post(apiUrl, {
       login: login,

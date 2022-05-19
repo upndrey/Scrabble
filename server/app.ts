@@ -9,6 +9,8 @@ import Lobbies from "./models/Lobbies";
 import session from 'express-session';
 import bcrypt from 'bcrypt';
 import Users from "./models/Users";
+import crypto from 'crypto'
+import Players from "./models/Players";
 
 // Encrypt options
 const saltRounds = 10;
@@ -16,7 +18,9 @@ const saltRounds = 10;
 // Session types
 declare module 'express-session' {
   interface Session {
-    login: string;
+    user: Users;
+    lobby: Lobbies;
+    player: Players;
   }
 }
 
@@ -53,32 +57,103 @@ app.use(
 
 // Routing
 app.post('/api/createLobby', async (req, res) => {
-  console.log("test3", req.sessionID)
-  if (req.session.login) 
-    console.log(req.session.login)
-  res.status(200);
-  res.json({});
-  res.end();
+  let status = 400;
+  const encryptedPassword = await bcrypt.hash(req.body.password, saltRounds)
+  const inviteId = crypto.randomBytes(8).toString("hex");
+  try{
+    const lobby = await Lobbies.create({
+      host_id: req.session.user.id,
+      name: req.body.name,
+      is_private: req.body.is_private,
+      max_players: req.body.max_players,
+      password: encryptedPassword,
+      invite_id: inviteId
+    });
+    if(!lobby) 
+      throw true;
+
+    const player = await Players.create({
+      user_id: req.session.user.id,
+      lobby_id: lobby.id,
+      is_host: false,
+      slot: 1
+    });
+    if(!player) 
+      throw true;
+
+    req.session.lobby = lobby;
+    req.session.player = player;
+    status = 200;
+  }
+  catch(err) {
+    status = 422;
+  }
+  finally {
+    res.status(status);
+    res.json({
+      invite_id: inviteId
+    });
+  }
 });
 
+app.get('/api/inviteLink/:id', async (req, res) => {
+  let status = 400;
+  try{
+    const lobby = await Lobbies.findOne({
+      where: {
+        invite_id: req.params.id
+      }
+    });
+    if(!lobby) 
+      throw true;
+    
+    const { count, rows } = await Players.findAndCountAll({
+      where: {
+        lobby_id: lobby.id
+      }
+    });
+    if(count > 3)
+      throw true;
+      
+    const player = await Players.create({
+      user_id: req.session.user.id,
+      lobby_id: lobby.id,
+      is_host: false,
+      slot: count + 1
+    });
+    if(!player) 
+      throw true;
+    
+    req.session.lobby = lobby;
+    req.session.player = player;
+    status = 200;
+     
+  }
+  catch(err) {
+    status = 422;
+  }
+  finally {
+    res.status(status);
+    res.json({});
+    res.redirect('http://localhost:3000/lobby');
+  }
+})
+
 app.post('/api/getUser', async (req, res) => {
-  console.log("test1", req.sessionID);
   let status = 400;
   let login = "";
-  if (req.session.login) {
+  if (req.session.user) {
     status = 200;
-    login = req.session.login;
+    login = req.session.user.login;
   }
   else {
     status = 422;
   }
   res.status(status);
   res.json({login});
-  res.end();
 });
 
 app.post('/api/login', async (req, res) => {
-  console.log("test2", req.sessionID);
   let status = 400;
   try {
     const user = await Users.findOne({
@@ -90,7 +165,7 @@ app.post('/api/login', async (req, res) => {
       const compareResult = 
         await bcrypt.compare(req.body.password, user.password)
       if(compareResult) {
-        req.session.login = user.login;
+        req.session.user = user;
         status = 200;
       }
       else
@@ -103,10 +178,8 @@ app.post('/api/login', async (req, res) => {
     status = 422;
   }
   finally {
-    console.log(status);
     res.status(status);
     res.json({});
-    res.end();
   }
 });
 
@@ -115,10 +188,8 @@ app.post('/api/logout', async (req, res) => {
   req.session.destroy((err) => {
     status = 422;
   });
-  console.log(status);
   res.status(status);
   res.json({});
-  res.end();
 });
 
 app.post('/api/signup', async (req, res) => {
@@ -137,8 +208,8 @@ app.post('/api/signup', async (req, res) => {
     if(user[1]) {
       status = 200;
       console.log(req.session);
-      if (!req.session.login) 
-        req.session.login = req.body.login
+      if (!req.session.user) 
+        req.session.user = user[0]
     }
     else {
       status = 422;
@@ -149,10 +220,8 @@ app.post('/api/signup', async (req, res) => {
     status = 422;
   }
   finally {
-    console.log(status)
     res.status(status)
     res.json({});
-    res.end();
   }
 });
 

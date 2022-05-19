@@ -7,6 +7,7 @@ import Button from '@mui/material/Button';
 import MenuIcon from '@mui/icons-material/Menu';
 import UserMenu from '../UserMenu/UserMenu';
 import { styled } from '@mui/system';
+import { Link } from "react-router-dom";
 
 
 const ActiveButton = styled(Button)(
@@ -101,11 +102,19 @@ const Menu: React.FunctionComponent<MenuProps> = (props) => {
         }}
       >
         <Toolbar>
-          <Typography variant="h4" component="div" sx={{ 
-             userSelect: "none"
-            }}>
-            Scrabble
-          </Typography>
+          <Link 
+            to="/"
+            style={{
+              textDecoration: 'none',
+              color: 'inherit'
+            }}
+          >
+            <Typography variant="h4" component="div" sx={{ 
+              userSelect: "none"
+              }}>
+              Scrabble
+            </Typography>
+          </Link>
           <Box
             sx={{
               flexGrow: 1,

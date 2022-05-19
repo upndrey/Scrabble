@@ -4,12 +4,10 @@ import PersonIcon from '@mui/icons-material/Person';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import React, { FormEvent, FunctionComponent, useRef } from "react";
 import styled from "styled-components";
+import { useNavigate } from 'react-router-dom'
 import axios from 'axios';
 axios.defaults.withCredentials = true;
 
-interface CreateLobbyProps {
-  
-}
 const CssTextField = styled(TextField)({
   '& label.Mui-focused': {
     color: 'white',
@@ -30,20 +28,33 @@ const CssTextField = styled(TextField)({
   },
 });
 
+interface CreateLobbyProps {
+  setInviteId: Function
+}
 
-const CreateLobby: FunctionComponent<CreateLobbyProps> = () => {
-  const [value, setValue] = React.useState<number | null>(2);
+const CreateLobby: FunctionComponent<CreateLobbyProps> = (props) => {
+  const { setInviteId } = props;
+  const [maxPlayers, setMaxPlayers] = React.useState<number | null>(2);
   const [hover, setHover] = React.useState(-1);
+  const [name, setName] = React.useState<string>('');
+  const [password, setPassword] = React.useState<string>('');
   const [isPrivate, setPrivate] = React.useState<boolean>(false);
+  const navigate = useNavigate();
   const form = useRef<HTMLFormElement>(document.createElement("form"));
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const apiUrl = 'http://localhost:3000/api/createLobby';
-    axios.post(apiUrl).then((response) => {
+    axios.post(apiUrl,{
+      name: name,
+      password: password,
+      is_private: isPrivate,
+      max_players: maxPlayers,
+    }).then((response) => {
       if(response.status === 200) {
         const json = response.data;
         console.log(response.status, json);
+        setInviteId(json.invite_id);
       }
       else if(response.status === 422) {
         // TODO
@@ -52,7 +63,7 @@ const CreateLobby: FunctionComponent<CreateLobbyProps> = () => {
         // TODO
       }
     });
-
+    navigate("/lobby");
   }
 
   return (
@@ -101,6 +112,9 @@ const CreateLobby: FunctionComponent<CreateLobbyProps> = () => {
             <CssTextField 
               id="filled-basic" 
               label="Введите название игры" 
+              value={name}
+              onInput={e => setName((e.target as HTMLInputElement).value)}
+                
               sx={{
                 width: '100%',
                 mb:1
@@ -140,7 +154,7 @@ const CreateLobby: FunctionComponent<CreateLobbyProps> = () => {
               </Typography>
               <Rating
                 name="hover-feedback"
-                value={value}
+                value={maxPlayers}
                 precision={1}
                 defaultValue={2} 
                 max={4}
@@ -148,7 +162,7 @@ const CreateLobby: FunctionComponent<CreateLobbyProps> = () => {
                   mr: 2
                 }}
                 onChange={(event, newValue) => {
-                  setValue(newValue);
+                  setMaxPlayers(newValue);
                 }}
                 size='medium'
                 onChangeActive={(event, newHover) => {
@@ -209,6 +223,7 @@ const CreateLobby: FunctionComponent<CreateLobbyProps> = () => {
                 <Switch 
                   color="secondary"
                   inputProps={{ 'aria-label': 'ant design' }} 
+                  value={isPrivate}
                   onChange={(e) => {
                     setPrivate(e.target.checked);
                   }}
@@ -226,6 +241,8 @@ const CreateLobby: FunctionComponent<CreateLobbyProps> = () => {
               <CssTextField 
                 id="filled-basic" 
                 label="Введите пароль для лобби" 
+                value={password}
+                onInput={e => setPassword((e.target as HTMLInputElement).value)}
                 sx={{
                   width: '100%',
                   mb:1,

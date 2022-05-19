@@ -46,7 +46,7 @@ const StartGameButton: FunctionComponent<StartGameButtonProps> = () => {
           }}
         >
           <Link 
-            to="/lobby"
+            to="/createLobby"
             style={linkStyles}
           >
             <Button 

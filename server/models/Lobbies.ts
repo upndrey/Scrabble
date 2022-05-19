@@ -5,8 +5,9 @@ class Lobbies extends Model {
   declare id: number;
   declare host_id: number;
   declare name: string;
-  declare is_online: boolean;
+  declare is_private: boolean;
   declare is_closed: boolean;
+  declare max_players: number;
 }
 
 Lobbies.init({
@@ -27,14 +28,23 @@ Lobbies.init({
     type: DataTypes.BOOLEAN,
     allowNull: false
   },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
   is_closed: {
     type: DataTypes.BOOLEAN,
-    allowNull: false
+    allowNull: false,
+    defaultValue: false
   },
   max_players: {
     type: DataTypes.INTEGER,
     allowNull: false,
     defaultValue: 2
+  },
+  invite_id: {
+    type: DataTypes.STRING,
+    allowNull: false
   }
 }, {
   sequelize,
