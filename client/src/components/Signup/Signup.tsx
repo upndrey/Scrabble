@@ -7,13 +7,13 @@ axios.defaults.withCredentials = true;
 interface SignupProps {
   isSignupOpened: boolean,
   setSignupOpen: Function,
-  setLogin: Function
+  getUserData: Function
 }
  
 const Signup: FunctionComponent<SignupProps> = (props) => {
   const [login, setLocalLogin] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const {isSignupOpened, setSignupOpen, setLogin} = props;
+  const {isSignupOpened, setSignupOpen, getUserData} = props;
   const handleSignupClose = () => setSignupOpen(false);
   
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -24,7 +24,8 @@ const Signup: FunctionComponent<SignupProps> = (props) => {
       password: password
     }).then((response) => {
       if(response.status === 200) {
-        setLogin(login);
+        getUserData();
+        handleSignupClose();
       }
       else if(response.status === 422) {
         // TODO
@@ -33,7 +34,6 @@ const Signup: FunctionComponent<SignupProps> = (props) => {
         // TODO
       }
     });
-    handleSignupClose();
   };
 
   return (

@@ -10,21 +10,26 @@ import Menu from '../Menu/Menu';
 import StartGameButton from '../StartGameButton/StartGameButton';
 import Signup from '../Signup/Signup';
 import axios from 'axios';
+import { UserData } from '../../interfaces/UserData';
 axios.defaults.withCredentials = true;
+
+
 
 function App() {
   const [isFriendsOpen, openFriends] = React.useState<boolean>(true);
   const [isLoginOpened, setLoginOpen] = React.useState<boolean>(false);
   const [isSignupOpened, setSignupOpen] = React.useState<boolean>(false);
   const [login, setLogin] = React.useState<string>("");
+  const [lobby, setLobby] = React.useState<UserData['lobby']>(null);
   const [inviteId, setInviteId] = React.useState<string>("");
-  
-  useEffect(() => {
-    const apiUrl = 'http://localhost:3000/api/getUser';
-    axios.post(apiUrl).then((response) => {
+
+  const getUserData = () => {
+    axios.post('http://localhost:3000/api/getUserData').then((response) => {
       if(response.status === 200) {
-        const json = response.data;
+        const json : UserData = response.data;
+        console.log(json);
         setLogin(json.login);
+        setLobby(json.lobby);
       }
       else if(response.status === 422) {
         // TODO
@@ -33,14 +38,18 @@ function App() {
         // TODO
       }
     });
+  }
+  
+  useEffect(() => {
+    getUserData();
   }, []);
 
   return (
     <div className="App">
       <StartGameButton></StartGameButton>
       <Menu 
-        setLoginOpen={setLoginOpen} 
-        openFriends={openFriends} 
+        setLoginOpen={setLoginOpen}
+        openFriends={openFriends}
         isFriendsOpen={isFriendsOpen}
         setSignupOpen={setSignupOpen}
         login={login}
@@ -49,18 +58,18 @@ function App() {
       <Login 
         isLoginOpened={isLoginOpened} 
         setLoginOpen={setLoginOpen}
-        setLogin={setLogin}
+        getUserData={getUserData}
       ></Login>
       <Signup 
         isSignupOpened={isSignupOpened} 
         setSignupOpen={setSignupOpen}
-        setLogin={setLogin}
+        getUserData={getUserData}
       ></Signup>
       <FriendsList isFriendsOpen={isFriendsOpen}></FriendsList>
       <Routes>
         <Route path='/createLobby' element={login !== "" ? <CreateLobby setInviteId={setInviteId} /> : ""} />
         <Route path='/lobbyList' element={login !== "" ? <LobbyList /> : ""} />
-        <Route path='/lobby' element={login !== "" ? <Lobby login={login} /> : ""} />
+        <Route path='/lobby' element={login !== "" && lobby ? <Lobby login={login} lobby={lobby} /> : ""} />
         <Route path="/" element={""} >
         </Route>
       </Routes>

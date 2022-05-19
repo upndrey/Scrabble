@@ -134,23 +134,83 @@ app.get('/api/inviteLink/:id', async (req, res) => {
   }
   finally {
     res.status(status);
-    res.json({});
-    res.redirect('http://localhost:3000/lobby');
+    // res.json({});
+    res.redirect('http://localhost:3001/lobby');
   }
 })
 
-app.post('/api/getUser', async (req, res) => {
+app.post('/api/getUserData', async (req, res) => {
   let status = 400;
   let login = "";
-  if (req.session.user) {
-    status = 200;
+  let lobby = null;
+  let lobbyBd;
+  try {
+    
+    if (!req.session.user) 
+      throw 422;
+    
     login = req.session.user.login;
+    if (req.session.lobby) {
+      lobbyBd = req.session.lobby;
+    }
+    else {
+      const player = await Players.findOne({
+        where: {
+          user_id: req.session.user.id,
+        }
+      });
+      if(!player)
+        throw 200;
+      
+      lobbyBd = await Lobbies.findOne({
+        where: {
+          id: player.lobby_id,
+        }
+      });
+    }
+    if(!lobbyBd)
+      throw 422;
+      
+    const players = await Users.findAll({
+      attributes: [
+        'login',
+        'id'
+      ],
+      include: [{
+        attributes: ['user_id','points', 'is_host'],
+        model: Players,
+        as: 'player',
+        required: true,
+        where: {
+          lobby_id: lobbyBd.id
+        }
+      }]
+    });
+    if(!players)
+      throw 422;
+      
+    lobby = {
+      name: lobbyBd.name,
+      max_players: lobbyBd.max_players,
+      slot1_info: players[0],
+      slot2_info: players[1] ? players[1] : null,
+      slot3_info: players[2] ? players[2] : null,
+      slot4_info: players[3] ? players[3] : null
+    };
+    status = 200;
   }
-  else {
-    status = 422;
+  catch(err) {
+    console.log(err);
+    if(err == 200)
+      status = 200;
+    else
+      status = 422;
   }
-  res.status(status);
-  res.json({login});
+  finally {
+    res.status(status);
+    res.json({login, lobby});
+  }
+  
 });
 
 app.post('/api/login', async (req, res) => {

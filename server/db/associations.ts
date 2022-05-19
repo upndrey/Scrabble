@@ -33,9 +33,11 @@ export const associate = function() {
   //Players
   Users.hasMany(Players, {
     foreignKey: "user_id",
+    as: 'player'
   });
   Players.belongsTo(Users, {
     foreignKey: "user_id",
+    as: 'player'
   });
   
   Lobbies.hasMany(Players, {

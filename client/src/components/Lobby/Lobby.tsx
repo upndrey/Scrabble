@@ -1,12 +1,14 @@
 import { Divider, List, ListItem, ListItemText, Paper, Slide, Typography } from "@mui/material";
 import { FunctionComponent } from "react";
+import { UserData } from "../../interfaces/UserData";
 
 interface LobbyProps {
   login: string
+  lobby: UserData["lobby"]
 }
 
 const Lobby: FunctionComponent<LobbyProps> = (props) => {
-  const {login} = props;
+  const {login, lobby} = props;
   return ( 
     <Slide direction="down" in={true}>
       <Paper
@@ -37,7 +39,10 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
         }}/>
         <List>
           <ListItem>
-            <ListItemText>{login}</ListItemText>
+            <ListItemText>{lobby?.slot1_info?.login}</ListItemText>
+            <ListItemText>{lobby?.slot2_info?.login}</ListItemText>
+            <ListItemText>{lobby?.slot3_info?.login}</ListItemText>
+            <ListItemText>{lobby?.slot4_info?.login}</ListItemText>
           </ListItem>
         </List>
       </Paper>

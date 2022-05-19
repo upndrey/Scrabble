@@ -10,45 +10,28 @@ axios.defaults.withCredentials = true;
 interface LoginProps {
   isLoginOpened: boolean,
   setLoginOpen: Function,
-  setLogin: Function
+  getUserData: Function
 }
 
  
 const Login: FunctionComponent<LoginProps> = (props) => {
   const [login, setLocalLogin] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const {isLoginOpened, setLoginOpen, setLogin} = props;
+  const {isLoginOpened, setLoginOpen, getUserData} = props;
   const handleLoginClose = () => setLoginOpen(false);
   
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // const response = await fetch('http://localhost:3000/api/login', { 
-    //   method: 'POST', 
-    //   body: JSON.stringify({
-    //     login: login,
-    //     password: password
-    //   }),
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   }
-    // });
-    // if(response.status === 200) {
-    //   setLogin(login);
-    // }
-    // else if(response.status === 422) {
-    //   // TODO
-    // }
-    // else if(response.status === 400) {
-    //   // TODO
-    // }
+
     const apiUrl = 'http://localhost:3000/api/login';
     axios.post(apiUrl, {
       login: login,
       password: password
     }).then((response) => {
       if(response.status === 200) {
-        setLogin(login);
+        getUserData();
+        handleLoginClose();
       }
       else if(response.status === 422) {
         // TODO
@@ -57,7 +40,6 @@ const Login: FunctionComponent<LoginProps> = (props) => {
         // TODO
       }
     });
-    handleLoginClose();
   };
 
   return (
