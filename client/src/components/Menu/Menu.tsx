@@ -23,7 +23,8 @@ interface MenuProps {
   setSignupOpen: Function,
   setLogin: Function,
   login: string,
-  hasLobby: boolean
+  hasLobby: boolean,
+  hasGame: boolean
 }
  
 const Menu: React.FunctionComponent<MenuProps> = (props) => {
@@ -34,7 +35,8 @@ const Menu: React.FunctionComponent<MenuProps> = (props) => {
     setSignupOpen, 
     setLogin,
     login,
-    hasLobby
+    hasLobby,
+    hasGame
   } = props;
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
@@ -70,6 +72,8 @@ const Menu: React.FunctionComponent<MenuProps> = (props) => {
   }
 
   const friendsButton = () => {
+    if(login === "") 
+      return (<></>);
     if(isFriendsOpen) 
       return (
         <ActiveButton 
@@ -97,7 +101,31 @@ const Menu: React.FunctionComponent<MenuProps> = (props) => {
   }
 
   const lobbyButton = () => {
-    if(hasLobby)
+    if(login === "") 
+      return (<></>);
+    if(hasGame)
+      return(
+        <Link 
+          style={{
+            textDecoration: 'none',
+            color: 'inherit'
+          }}
+          to="/game"
+        >
+          <Button 
+            color="inherit"
+            sx={{
+              backgroundColor: 'secondary.main',
+              '&:hover': {
+                backgroundColor: 'secondary.light',
+              }
+            }}
+          >
+            Игра
+          </Button>
+        </Link>
+      );
+    else if(hasLobby)
       return(
         <Link 
           style={{
@@ -151,7 +179,12 @@ const Menu: React.FunctionComponent<MenuProps> = (props) => {
             }}
           >
             {friendsButton()}
-            <Button color="inherit">
+            <Button 
+              color="inherit"
+              sx={{
+                mr:1
+              }}
+            >
               Правила
             </Button>
             {lobbyButton()}

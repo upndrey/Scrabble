@@ -24,7 +24,8 @@ class Maps extends Model {
           map_id: map[0].id,
         }
       });
-      if(count !== 255) {
+      console.log("testtttttttttttttttttt", count)
+      if(count !== 225) {
         const defaultModifier = await CellModifiers.getDefaultModifier();
         await MapCells.destroy({
           where: {
@@ -44,6 +45,21 @@ class Maps extends Model {
               defaults: {
                 map_id: map[0].id,
                 cell_modifier_id: defaultModifier[0].id,
+                row: i,
+                col: j
+              }
+            });
+            mapCells[i - 1].push(cell[0]);
+          }
+        }
+      }
+      else {
+        for(let i = 1; i <= 15; i++) {
+          mapCells.push([]);
+          for(let j = 1; j <= 15; j++) {
+            const cell = await MapCells.findAll({
+              where: { 
+                map_id: map[0].id,
                 row: i,
                 col: j
               }

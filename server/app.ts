@@ -29,7 +29,7 @@ declare module 'express-session' {
 }
 
 // Db setup
-// associate();
+associate();
 // init();
 // Maps.generateMap();
 
@@ -158,6 +158,7 @@ app.post('/api/getUserData', async (req, res) => {
   let status = 400;
   let login = "";
   let lobby = null;
+  let game: any = null;
   let lobbyBd;
   try {
     
@@ -185,7 +186,7 @@ app.post('/api/getUserData', async (req, res) => {
     }
     if(!lobbyBd)
       throw 422;
-      
+    req.session.lobby = lobbyBd;
     const players = await Users.findAll({
       attributes: [
         'login',
@@ -210,6 +211,32 @@ app.post('/api/getUserData', async (req, res) => {
       invite_id: lobbyBd.invite_id,
       players
     };
+
+    const gameBd = await Games.findOne({
+      attributes: ['id', 'turn', 'is_closed'],
+      where: {
+        lobby_id: req.session.lobby.id
+      }
+    });
+    if(!gameBd)
+      throw 200;
+    game = {};
+    game.gameInfo = gameBd;
+    const {set, symbols} = await Sets.generateRuSet();
+    if(!set)
+      throw 422;
+    game.symbols = symbols;
+
+    const {map, mapCells} = await Maps.generateMap();
+    if(!map)
+      throw 422;
+    game.mapCells = mapCells;
+
+    const {field, fieldCells} = await Fields.generateField(gameBd.id);
+    if(!field)
+      throw 422;
+    game.fieldCells = fieldCells;
+
     status = 200;
   }
   catch(err) {
@@ -221,7 +248,7 @@ app.post('/api/getUserData', async (req, res) => {
   }
   finally {
     res.status(status);
-    res.json({login, lobby});
+    res.json({login, lobby, game});
   }
   
 });

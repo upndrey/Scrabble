@@ -1,18 +1,25 @@
 import { Alert, Button, Divider, List, ListItemText, Paper, Slide, Snackbar, Stack, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import axios from "axios";
-import { FunctionComponent, useState } from "react";
+import { FunctionComponent, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { UserData } from "../../interfaces/UserData";
 
 interface LobbyProps {
   login: string
-  lobby: UserData["lobby"]
+  lobby: UserData["lobby"],
+  hasGame: boolean
 }
 
 const Lobby: FunctionComponent<LobbyProps> = (props) => {
-  const {login, lobby} = props;
+  const {login, lobby, hasGame} = props;
   const [copySuccess, setCopySuccess] = useState<boolean>(false);
   const [isGameStart, startGame] = useState<boolean>(false);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if(hasGame)
+      navigate('/game');
+  });
   if(!lobby)
     return (<div></div>);
   const renderPlayer = (player: any, index: number, lobby: UserData["lobby"]) => {

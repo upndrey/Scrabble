@@ -5,14 +5,14 @@ import FieldCells from "./FieldCells";
 class Fields extends Model {
   declare id: number;
   declare game_id: number;
-  static generateField = async (game_id: number) => {
+  static generateField = async (gameId: number) => {
     let field = null;
     let fieldCells: Array<Array<FieldCells>> = [];
     try {
       field = await Fields.findOrCreate({
-        where: { game_id: game_id },
+        where: { game_id: gameId },
         defaults: {
-          game_id: game_id
+          game_id: gameId
         }
       });
       if(!field)
