@@ -8,6 +8,7 @@ class Lobbies extends Model {
   declare is_private: boolean;
   declare is_closed: boolean;
   declare max_players: number;
+  declare invite_id: string
 }
 
 Lobbies.init({

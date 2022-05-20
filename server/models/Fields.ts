@@ -5,17 +5,46 @@ import FieldCells from "./FieldCells";
 class Fields extends Model {
   declare id: number;
   declare game_id: number;
-
-  async generateDefaultField(game_id: number) {
-    const field = await Fields.create({game_id});
-    for(let i = 0; i < 15; i++) {
-      for(let j = 0; j < 15; j++) {
-        await FieldCells.create({
-          field_id: field.id,
-          row: i,
-          col: j
-        })
+  static generateField = async (game_id: number) => {
+    let field = null;
+    let fieldCells: Array<Array<FieldCells>> = [];
+    try {
+      field = await Fields.findOrCreate({
+        where: { game_id: game_id },
+        defaults: {
+          game_id: game_id
+        }
+      });
+      if(!field)
+        throw true;
+  
+  
+      for(let i = 1; i <= 15; i++) {
+        fieldCells.push([]);
+        for(let j = 1; j <= 15; j++) {
+          const cell = await FieldCells.findOrCreate({
+            where: { 
+              row: i,
+              col: j
+            },
+            defaults: {
+              field_id: field[0].id,
+              row: i,
+              col: j
+            }
+          });
+          fieldCells[i - 1].push(cell[0]);
+        }
       }
+    }
+    catch(err) {
+      console.log(err);
+    }
+    finally {
+      return {
+        field,
+        fieldCells
+      };
     }
   }
 }

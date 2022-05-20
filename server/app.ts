@@ -11,6 +11,10 @@ import bcrypt from 'bcrypt';
 import Users from "./models/Users";
 import crypto from 'crypto'
 import Players from "./models/Players";
+import Maps from "./models/Maps";
+import Sets from "./models/Sets";
+import Fields from "./models/Fields";
+import Games from "./models/Games";
 
 // Encrypt options
 const saltRounds = 10;
@@ -27,6 +31,7 @@ declare module 'express-session' {
 // Db setup
 // associate();
 // init();
+// Maps.generateMap();
 
 // Express setup
 const app = express();
@@ -114,12 +119,22 @@ app.get('/api/inviteLink/:id', async (req, res) => {
     });
     if(count > 3)
       throw true;
-      
+    let freeSlotsArray = [true, true, true, true];
+    for(let i = 0; i < rows.length; i++) {
+      freeSlotsArray[rows[i].slot - 1] = false;
+    }
+    let freeSlotId = 0;
+    for(let i = 0; i < freeSlotsArray.length; i++) {
+      if(freeSlotsArray[i]) {
+        freeSlotId = i;
+        break;
+      }
+    }
     const player = await Players.create({
       user_id: req.session.user.id,
       lobby_id: lobby.id,
       is_host: false,
-      slot: count + 1
+      slot: freeSlotId + 1
     });
     if(!player) 
       throw true;
@@ -177,7 +192,7 @@ app.post('/api/getUserData', async (req, res) => {
         'id'
       ],
       include: [{
-        attributes: ['user_id','points', 'is_host'],
+        attributes: ['user_id','points', 'is_host', 'slot'],
         model: Players,
         as: 'player',
         required: true,
@@ -192,10 +207,8 @@ app.post('/api/getUserData', async (req, res) => {
     lobby = {
       name: lobbyBd.name,
       max_players: lobbyBd.max_players,
-      slot1_info: players[0],
-      slot2_info: players[1] ? players[1] : null,
-      slot3_info: players[2] ? players[2] : null,
-      slot4_info: players[3] ? players[3] : null
+      invite_id: lobbyBd.invite_id,
+      players
     };
     status = 200;
   }
@@ -211,6 +224,52 @@ app.post('/api/getUserData', async (req, res) => {
     res.json({login, lobby});
   }
   
+});
+
+
+app.post('/api/startGame', async (req, res) => {
+  let status = 400;
+  let game = null;
+  let symbolsArray = null;
+  let mapCellsArray = null;
+  let fieldCellsArray = null;
+  try {
+    const {set, symbols} = await Sets.generateRuSet();
+    if(!set)
+      throw true;
+    symbolsArray = symbols;
+    const {map, mapCells} = await Maps.generateMap();
+    if(!map)
+      throw true;
+    mapCellsArray = mapCells;
+    game = await Games.create({
+      lobby_id: req.session.lobby.id,
+      set_id: set[0].id,
+      map_id: map[0].id,
+    });
+    
+    if(!game)
+      throw true;
+
+    const {field, fieldCells} = await Fields.generateField(game.id);
+    if(!field)
+      throw true;
+    fieldCellsArray = fieldCells;
+    status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    status = 422;
+  }
+  finally {
+    res.status(status);
+    res.json({
+      game, 
+      symbolsArray,
+      mapCellsArray,
+      fieldCellsArray
+    });
+  }
 });
 
 app.post('/api/login', async (req, res) => {

@@ -7,6 +7,79 @@ class CellModifiers extends Model {
   declare value: number;
   declare description: string;
   declare color: string;
+  static getDefaultModifier = async function(): Promise<[CellModifiers, boolean]> {
+    const defaultModifier = await CellModifiers.findOrCreate({
+      where: { 
+        name: 'default' 
+      },
+      defaults: {
+        name: 'default',
+        value: 1,
+      }
+    });
+  
+    return defaultModifier;
+  }
+  
+  static getCellX2Modifier = async function(): Promise<[CellModifiers, boolean]> {
+    const cellX2Modifier = await CellModifiers.findOrCreate({
+      where: { 
+        name: 'cell',
+        value: 2 
+      },
+      defaults: {
+        name: 'cell',
+        value: 2,
+      }
+    });
+  
+    return cellX2Modifier;
+  }
+  
+  static getCellX3Modifier = async function(): Promise<[CellModifiers, boolean]> {
+    const cellX3Modifier = await CellModifiers.findOrCreate({
+      where: { 
+        name: 'cell',
+        value: 3 
+      },
+      defaults: {
+        name: 'cell',
+        value: 3,
+      }
+    });
+  
+    return cellX3Modifier;
+  }
+
+  static getWordX2Modifier = async function(): Promise<[CellModifiers, boolean]> {
+    const wordX2Modifier = await CellModifiers.findOrCreate({
+      where: { 
+        name: 'word',
+        value: 2 
+      },
+      defaults: {
+        name: 'word',
+        value: 2,
+      }
+    });
+  
+    return wordX2Modifier;
+  }
+
+  static getWordX3Modifier = async function(): Promise<[CellModifiers, boolean]> {
+    const wordX3Modifier = await CellModifiers.findOrCreate({
+      where: { 
+        name: 'word',
+        value: 3,
+      },
+      defaults: {
+        name: 'word',
+        value: 3,
+      }
+    });
+  
+    return wordX3Modifier;
+  }
 }
 
 CellModifiers.init({

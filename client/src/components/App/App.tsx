@@ -54,6 +54,7 @@ function App() {
         setSignupOpen={setSignupOpen}
         login={login}
         setLogin={setLogin}
+        hasLobby={lobby ? true : false}
       ></Menu>
       <Login 
         isLoginOpened={isLoginOpened} 

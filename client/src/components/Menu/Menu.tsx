@@ -22,7 +22,8 @@ interface MenuProps {
   setLoginOpen: Function,
   setSignupOpen: Function,
   setLogin: Function,
-  login: string
+  login: string,
+  hasLobby: boolean
 }
  
 const Menu: React.FunctionComponent<MenuProps> = (props) => {
@@ -32,7 +33,8 @@ const Menu: React.FunctionComponent<MenuProps> = (props) => {
     setLoginOpen, 
     setSignupOpen, 
     setLogin,
-    login
+    login,
+    hasLobby
   } = props;
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
@@ -49,7 +51,6 @@ const Menu: React.FunctionComponent<MenuProps> = (props) => {
   }
 
   const renderLoginMenu = () => {
-    console.log(login);
     if(login !== "") {
       return <UserMenu 
         login={login} 
@@ -94,6 +95,34 @@ const Menu: React.FunctionComponent<MenuProps> = (props) => {
         </Button>
       )
   }
+
+  const lobbyButton = () => {
+    if(hasLobby)
+      return(
+        <Link 
+          style={{
+            textDecoration: 'none',
+            color: 'inherit'
+          }}
+          to="/lobby"
+        >
+          <Button 
+            color="inherit"
+            sx={{
+              backgroundColor: 'secondary.main',
+              '&:hover': {
+                backgroundColor: 'secondary.light',
+              }
+            }}
+          >
+            Лобби
+          </Button>
+        </Link>
+      );
+    else {
+      return (<></>);
+    }
+  }
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar 
@@ -125,6 +154,7 @@ const Menu: React.FunctionComponent<MenuProps> = (props) => {
             <Button color="inherit">
               Правила
             </Button>
+            {lobbyButton()}
           </Box>
           {renderLoginMenu()}
           
