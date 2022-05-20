@@ -15,6 +15,7 @@ class CellModifiers extends Model {
       defaults: {
         name: 'default',
         value: 1,
+        color: 'green'
       }
     });
   
@@ -30,6 +31,7 @@ class CellModifiers extends Model {
       defaults: {
         name: 'cell',
         value: 2,
+        color: 'lightblue'
       }
     });
   
@@ -45,6 +47,7 @@ class CellModifiers extends Model {
       defaults: {
         name: 'cell',
         value: 3,
+        color: 'pink'
       }
     });
   
@@ -60,6 +63,7 @@ class CellModifiers extends Model {
       defaults: {
         name: 'word',
         value: 2,
+        color: 'blue'
       }
     });
   
@@ -75,6 +79,7 @@ class CellModifiers extends Model {
       defaults: {
         name: 'word',
         value: 3,
+        color: 'red'
       }
     });
   

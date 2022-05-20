@@ -21,13 +21,24 @@ export interface UserData {
     },
     symbols: (string | number)[][],
     mapCells: {
-      id: number,
-      map_id: number,
-      cell_modifier_id: number,
-      row: number,
-      col: number,
-      createdAt: string,
-      updatedAt: string
+      cell: {
+        id: number,
+        map_id: number,
+        cell_modifier_id: number,
+        row: number,
+        col: number,
+        createdAt: string,
+        updatedAt: string
+      },
+      modifier: {
+        id: number,
+        name: string,
+        value: number,
+        description: string | null,
+        color: string,
+        createdAt: string,
+        updatedAt: string
+      }
     }[][],
     fieldCells: {
       id: number,

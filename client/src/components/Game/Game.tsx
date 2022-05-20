@@ -17,7 +17,7 @@ const Game: FunctionComponent<GameProps> = (props) => {
   });
     return ( 
       <Box
-        width={825}
+        width={1225}
         height={825} 
         sx={{
           position:"absolute",

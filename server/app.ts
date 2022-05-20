@@ -31,7 +31,7 @@ declare module 'express-session' {
 // Db setup
 associate();
 // init();
-// Maps.generateMap();
+Maps.generateMap();
 
 // Express setup
 const app = express();
