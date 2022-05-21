@@ -1,3 +1,4 @@
+import Hands from '../models/Hands';
 import {
   Users, 
   Friends,
@@ -47,6 +48,16 @@ export const associate = function() {
     foreignKey: "lobby_id",
   });
 
+  //Hands
+  Players.hasOne(Hands, {
+    foreignKey: "player_id",
+    as: 'hand'
+  })
+  Hands.belongsTo(Players, {
+    foreignKey: "player_id",
+    as: 'hand'
+  });
+
   //Lobbies
   Users.hasOne(Lobbies, {
     foreignKey: "host_id",
@@ -68,13 +79,6 @@ export const associate = function() {
   });
   Games.belongsTo(Maps, {
     foreignKey: "map_id",
-  });
-
-  Sets.hasMany(Games, {
-    foreignKey: "set_id",
-  });
-  Games.belongsTo(Sets, {
-    foreignKey: "set_id",
   });
 
   //Fields
@@ -101,6 +105,14 @@ export const associate = function() {
   });
 
   //Sets
+  Games.hasOne(Sets, {
+    foreignKey: "game_id",
+    as: 'set'
+  });
+  Sets.belongsTo(Games, {
+    foreignKey: "game_id",
+    as: 'set'
+  });
 
   //Symbols
   Sets.hasMany(Symbols, {
@@ -108,6 +120,64 @@ export const associate = function() {
   });
   Symbols.belongsTo(Sets, {
     foreignKey: "set_id",
+  });
+
+  
+  Symbols.hasOne(Hands, {
+    foreignKey: "slot1",
+    as: 'slot1_symbol'
+  });
+  Hands.belongsTo(Symbols, {
+    foreignKey: "slot1",
+    as: 'slot1_symbol'
+  });
+  Symbols.hasOne(Hands, {
+    foreignKey: "slot2",
+    as: 'slot2_symbol'
+  });
+  Hands.belongsTo(Symbols, {
+    foreignKey: "slot2",
+    as: 'slot2_symbol'
+  });
+  Symbols.hasOne(Hands, {
+    foreignKey: "slot3",
+    as: 'slot3_symbol'
+  });
+  Hands.belongsTo(Symbols, {
+    foreignKey: "slot3",
+    as: 'slot3_symbol'
+  });
+  Symbols.hasOne(Hands, {
+    foreignKey: "slot4",
+    as: 'slot4_symbol'
+  });
+  Hands.belongsTo(Symbols, {
+    foreignKey: "slot4",
+    as: 'slot4_symbol'
+  });
+  Symbols.hasOne(Hands, {
+    foreignKey: "slot5",
+    as: 'slot5_symbol'
+  });
+  Hands.belongsTo(Symbols, {
+    foreignKey: "slot5",
+    as: 'slot5_symbol'
+  });
+  Symbols.hasOne(Hands, {
+    foreignKey: "slot6",
+    as: 'slot6_symbol'
+  });
+  Hands.belongsTo(Symbols, {
+    foreignKey: "slot6",
+    as: 'slot6_symbol'
+  });
+  Symbols.hasOne(Hands, {
+    foreignKey: "slot7",
+    as: 'slot7_symbol'
+  });
+  Hands.belongsTo(Symbols, {
+    foreignKey: "slot7",
+    as: 'slot7_symbol'
   });
 
   //Maps

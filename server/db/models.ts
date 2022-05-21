@@ -10,6 +10,8 @@ import Maps from '../models/Maps';
 import Sets from '../models/Sets';
 import Symbols from '../models/Symbols';
 import Players from '../models/Players';
+import Hands from '../models/Hands';
+
 
 export {
   Users,
@@ -23,5 +25,6 @@ export {
   Maps, 
   Sets, 
   Symbols,
-  Players
+  Players,
+  Hands
 };

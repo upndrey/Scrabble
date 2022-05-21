@@ -13,7 +13,7 @@ const Game: FunctionComponent<GameProps> = (props) => {
   const navigate = useNavigate();
   useEffect(() => {
     if(!game)
-      navigate('/');
+      navigate('/'); 
   });
     return ( 
       <Box

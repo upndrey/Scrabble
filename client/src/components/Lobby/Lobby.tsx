@@ -8,11 +8,12 @@ import { UserData } from "../../interfaces/UserData";
 interface LobbyProps {
   login: string
   lobby: UserData["lobby"],
-  hasGame: boolean
+  hasGame: boolean,
+  getUserData: Function
 }
 
 const Lobby: FunctionComponent<LobbyProps> = (props) => {
-  const {login, lobby, hasGame} = props;
+  const {login, lobby, hasGame, getUserData} = props;
   const [copySuccess, setCopySuccess] = useState<boolean>(false);
   const [isGameStart, startGame] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -41,12 +42,24 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
       </Box>
     )
   }
+  const firstTurn = async () => {
+    await axios.post('http://localhost:3000/api/nextTurn').then(async (response) => {
+      if(response.status === 200) {
+      }
+      else if(response.status === 422) {
+        // TODO
+      }
+      else if(response.status === 400) {
+        // TODO
+      }
+    });
+  }
 
   const startGameHandler = () => {
-    axios.post('http://localhost:3000/api/startGame').then((response) => {
+    axios.post('http://localhost:3000/api/startGame').then(async (response) => {
       if(response.status === 200) {
-        const json = response.data;
-        console.log(json);
+        await firstTurn();
+        await getUserData();
         startGame(true);
       }
       else if(response.status === 422) {
@@ -65,8 +78,9 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
     for(let i = 0; i < lobby.max_players - lobby.players.length; i++) {
       lobby.players.push(null);
     }
-    const listPlayers = lobby.players.map((player: any, index) => {
-      return renderPlayer(player, index, lobby)
+    console.log(lobby);
+    const listPlayers = lobby.players.map((user: any, index) => {
+      return renderPlayer(user?.player, index, lobby)
     });
     return listPlayers;
   }

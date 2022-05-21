@@ -4,7 +4,6 @@ import sequelize from '../db/db.config'
 class Games extends Model {
   declare id: number;
   declare lobby_id: number;
-  declare set_id: number;
   declare map_id: number;
   declare is_closed: boolean;
   declare turn: number;
@@ -20,10 +19,6 @@ Games.init({
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-  set_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
   map_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -36,7 +31,7 @@ Games.init({
   turn: {
     type: DataTypes.INTEGER,
     allowNull: true,
-    defaultValue: 0
+    defaultValue: -1
   }
 }, {
   sequelize,

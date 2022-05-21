@@ -4,8 +4,46 @@ import Symbols from "./Symbols";
 
 class Sets extends Model {
   declare id: number;
-  declare name: string;
-  static generateRuSet = async function() {
+  declare game_id: number;
+  
+  static getSet = async function(game_id: number, in_box: boolean = false) {
+    let set = null;
+    let symbols = null;
+    try {
+      set = await Sets.findOne({
+        where: { 
+          game_id: game_id 
+        }
+      });
+      if(!set)
+        throw true;
+      if(in_box)
+        symbols = await Symbols.findAll({
+          attributes: ['id', 'value', 'price', 'in_box'],
+          where: {
+            set_id: set.id,
+            in_box: true
+          }
+        })
+      else 
+        symbols = await Symbols.findAll({
+          attributes: ['id', 'value', 'price', 'in_box'],
+          where: {
+            set_id: set.id
+          }
+        })
+    }
+    catch(err) {
+      console.log(err);
+    }
+    finally {
+      return {
+        set,
+        symbols
+      };
+    }
+  }
+  static generateRuSet = async function(game_id: number) {
     const symbols = [
       ["а",1],["а",1],["а",1],["а",1],["а",1],["а",1],["а",1],["а",1],
       ["б",3],["б",3],
@@ -45,9 +83,9 @@ class Sets extends Model {
     let set = null;
     try {
       set = await Sets.findOrCreate({
-        where: { name: 'default' },
+        where: { game_id: game_id },
         defaults: {
-          name: 'default'
+          game_id: game_id
         }
       });
       if(!set)
@@ -91,8 +129,8 @@ Sets.init({
     autoIncrement: true,
     primaryKey: true
   },
-  name: {
-    type: DataTypes.STRING,
+  game_id: {
+    type: DataTypes.INTEGER,
     allowNull: false,
   }
 }, {

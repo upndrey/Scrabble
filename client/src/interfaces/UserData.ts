@@ -4,13 +4,22 @@ export interface UserData {
     name: string,
     invite_id: string,
     players: Array<{
-      login: string,
-      id: number,
-      player: Array<{
-        is_host: boolean,
-        points: number | null,
-        user_id: number,
-      }>
+      user_id: number,
+      is_host: boolean,
+      points: number | null,
+      player: {
+        id: number,
+        login: string,
+      },
+      hand: {
+        slot1: number | null,
+        slot2: number | null,
+        slot3: number | null,
+        slot4: number | null,
+        slot5: number | null,
+        slot6: number | null,
+        slot7: number | null,
+      }
     } | null>
   } | null,
   game: {
@@ -19,7 +28,7 @@ export interface UserData {
       turn: number,
       is_closed: boolean
     },
-    symbols: (string | number)[][],
+    symbols: { id: number; value: string; price: number; in_box: number; }[],
     mapCells: {
       cell: {
         id: number,

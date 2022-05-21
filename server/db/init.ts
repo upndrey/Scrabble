@@ -10,7 +10,8 @@ import {
   FieldCells,
   Symbols,
   MapCells,
-  CellModifiers
+  CellModifiers,
+  Hands
 } from './models';
 
 export const init = async function() {
@@ -26,4 +27,5 @@ export const init = async function() {
   await Symbols.sync({ alter: true });
   await MapCells.sync({ alter: true });
   await CellModifiers.sync({ alter: true });
+  await Hands.sync({ alter: true });
 }

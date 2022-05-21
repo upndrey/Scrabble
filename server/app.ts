@@ -15,6 +15,8 @@ import Maps from "./models/Maps";
 import Sets from "./models/Sets";
 import Fields from "./models/Fields";
 import Games from "./models/Games";
+import Symbols from "./models/Symbols";
+import Hands from "./models/Hands";
 
 // Encrypt options
 const saltRounds = 10;
@@ -25,13 +27,15 @@ declare module 'express-session' {
     user: Users;
     lobby: Lobbies;
     player: Players;
+    game: Games;
+    symbols: Symbols[] | null;
   }
 }
 
 // Db setup
 associate();
 // init();
-Maps.generateMap();
+// Maps.generateMap();
 
 // Express setup
 const app = express();
@@ -86,6 +90,12 @@ app.post('/api/createLobby', async (req, res) => {
     if(!player) 
       throw true;
 
+    const hand = await Hands.create({
+      player_id: player.id
+    });
+    if(!hand) 
+      throw true;
+
     req.session.lobby = lobby;
     req.session.player = player;
     status = 200;
@@ -130,17 +140,29 @@ app.get('/api/inviteLink/:id', async (req, res) => {
         break;
       }
     }
-    const player = await Players.create({
-      user_id: req.session.user.id,
-      lobby_id: lobby.id,
-      is_host: false,
-      slot: freeSlotId + 1
+    const player = await Players.findOrCreate({
+      where: {
+        user_id: req.session.user.id,
+        lobby_id: lobby.id,
+      },
+      defaults: {
+        user_id: req.session.user.id,
+        lobby_id: lobby.id,
+        is_host: false,
+        slot: freeSlotId + 1
+      }
     });
     if(!player) 
       throw true;
     
+    const hand = await Hands.create({
+      player_id: player[0].id
+    });
+    if(!hand) 
+      throw true;
+
     req.session.lobby = lobby;
-    req.session.player = player;
+    req.session.player = player[0];
     status = 200;
      
   }
@@ -163,7 +185,7 @@ app.post('/api/getUserData', async (req, res) => {
   try {
     
     if (!req.session.user) 
-      throw 422;
+      throw 200;
     
     login = req.session.user.login;
     if (req.session.lobby) {
@@ -177,6 +199,7 @@ app.post('/api/getUserData', async (req, res) => {
       });
       if(!player)
         throw 200;
+      req.session.player = player;
       
       lobbyBd = await Lobbies.findOne({
         where: {
@@ -187,20 +210,26 @@ app.post('/api/getUserData', async (req, res) => {
     if(!lobbyBd)
       throw 422;
     req.session.lobby = lobbyBd;
-    const players = await Users.findAll({
-      attributes: [
-        'login',
-        'id'
-      ],
+    const players = await Players.findAll({
+      attributes: ['user_id','points', 'is_host', 'slot'],
+      where: {
+        lobby_id: lobbyBd.id
+      },
       include: [{
-        attributes: ['user_id','points', 'is_host', 'slot'],
-        model: Players,
-        as: 'player',
-        required: true,
-        where: {
-          lobby_id: lobbyBd.id
-        }
-      }]
+          attributes: [
+            'id',
+            'login'
+          ],
+          model: Users,
+          as: 'player',
+          required: true
+        },{
+          attributes: ['slot1','slot2', 'slot3', 'slot4', 'slot5', 'slot6', 'slot7'],
+          model: Hands,
+          as: 'hand',
+          required: true
+        },
+      ]
     });
     if(!players)
       throw 422;
@@ -222,10 +251,11 @@ app.post('/api/getUserData', async (req, res) => {
       throw 200;
     game = {};
     game.gameInfo = gameBd;
-    const {set, symbols} = await Sets.generateRuSet();
+    const {set, symbols} = await Sets.getSet(gameBd.id);
     if(!set)
       throw 422;
     game.symbols = symbols;
+    req.session.game = gameBd;
 
     const {map, mapCells} = await Maps.generateMap();
     if(!map)
@@ -253,35 +283,28 @@ app.post('/api/getUserData', async (req, res) => {
   
 });
 
-
 app.post('/api/startGame', async (req, res) => {
   let status = 400;
-  let game = null;
-  let symbolsArray = null;
-  let mapCellsArray = null;
-  let fieldCellsArray = null;
   try {
-    const {set, symbols} = await Sets.generateRuSet();
-    if(!set)
-      throw true;
-    symbolsArray = symbols;
-    const {map, mapCells} = await Maps.generateMap();
+
+    const {map} = await Maps.generateMap();
     if(!map)
       throw true;
-    mapCellsArray = mapCells;
-    game = await Games.create({
+
+    const game = await Games.create({
       lobby_id: req.session.lobby.id,
-      set_id: set[0].id,
       map_id: map[0].id,
     });
-    
     if(!game)
       throw true;
 
-    const {field, fieldCells} = await Fields.generateField(game.id);
+    const {set, symbols} = await Sets.generateRuSet(game.id);
+    if(!set)
+      throw true;
+    const {field} = await Fields.generateField(game.id);
     if(!field)
       throw true;
-    fieldCellsArray = fieldCells;
+
     status = 200;
   }
   catch(err) {
@@ -290,12 +313,161 @@ app.post('/api/startGame', async (req, res) => {
   }
   finally {
     res.status(status);
-    res.json({
-      game, 
-      symbolsArray,
-      mapCellsArray,
-      fieldCellsArray
+    res.json({});
+  }
+});
+
+
+
+function findSlotByTurn(turn: number, playersCount: number) {
+  let slot = 1;
+  switch(turn % playersCount) {
+    case 0:
+      slot = 1;
+      break;
+    case 1:
+      slot = 2;
+      break;
+    case 2:
+      slot = 3;
+      break;
+    case 3:
+      slot = 4;
+      break;
+  }
+  return slot;
+}
+
+function shuffle(array: Array<any>) {
+  array.sort(() => Math.random() - 0.5);
+}
+
+app.post('/api/nextTurn', async (req, res) => {
+  let status = 400;
+  try {
+    let game : Games | null = req.session.game;
+    if(!game) {
+      game = await Games.findOne({
+        where: {
+          lobby_id: req.session.lobby.id
+        }
+      })
+    }
+
+    if(!game)
+      throw true;
+
+    const currentPlayer = await Players.findOne({
+      where: {
+        lobby_id: req.session.lobby.id,
+        slot: findSlotByTurn(game.turn, req.session.lobby.max_players)
+      },
     });
+    if(!currentPlayer)
+      throw true;
+
+    currentPlayer.update({
+      points: req.body.points
+    })
+
+    const currentHand = await Hands.findOne({
+      where: {
+        player_id: currentPlayer.id
+      }
+    })
+
+    if(!currentHand)
+      throw true;
+      
+    const {set, symbols} = await Sets.getSet(game.id, true);
+    if(!symbols)
+      throw true;
+      
+    shuffle(symbols);
+
+    let symbol = symbols.pop();
+    if(symbol) {
+      currentHand.update({
+        slot1: currentHand.slot1 ? null : symbol.id
+      });
+      symbol.update({
+        in_box: false
+      });
+    }
+
+    symbol = symbols.pop();
+    if(symbol) {
+      currentHand.update({
+        slot2: currentHand.slot2 ? null : symbol.id
+      });
+      symbol.update({
+        in_box: false
+      });
+    }
+
+    symbol = symbols.pop();
+    if(symbol) {
+      currentHand.update({
+        slot3: currentHand.slot3 ? null : symbol.id
+      });
+      symbol.update({
+        in_box: false
+      });
+    } 
+
+    symbol = symbols.pop();
+    if(symbol) {
+      currentHand.update({
+        slot4: currentHand.slot4 ? null : symbol.id
+      });
+      symbol.update({
+        in_box: false
+      });
+    } 
+
+    symbol = symbols.pop();
+    if(symbol) {
+      currentHand.update({
+        slot5: currentHand.slot5 ? null : symbol.id
+      });
+      symbol.update({
+        in_box: false
+      });
+    } 
+
+    symbol = symbols.pop();
+    if(symbol) {
+      currentHand.update({
+        slot6: currentHand.slot6 ? null : symbol.id
+      });
+      symbol.update({
+        in_box: false
+      });
+    }
+
+    symbol = symbols.pop();
+    if(symbol) {
+      currentHand.update({
+        slot7: currentHand.slot7 ? null : symbol.id
+      });
+      symbol.update({
+        in_box: false
+      });
+    }
+
+    await game.update({
+      turn: game.turn + 1
+    });
+
+    status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    status = 422;
+  }
+  finally {
+    res.status(status);
+    res.json({});
   }
 });
 

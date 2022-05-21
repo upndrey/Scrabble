@@ -6,6 +6,7 @@ class Symbols extends Model {
   declare set_id: number;
   declare value: string;
   declare price: number;
+  declare in_box: boolean;
 }
 
 Symbols.init({
@@ -25,6 +26,11 @@ Symbols.init({
   price: {
     type: DataTypes.INTEGER,
     allowNull: false,
+  },
+  in_box: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: true
   }
 }, {
   sequelize,

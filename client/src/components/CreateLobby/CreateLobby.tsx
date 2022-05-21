@@ -29,11 +29,12 @@ const CssTextField = styled(TextField)({
 });
 
 interface CreateLobbyProps {
-  setInviteId: Function
+  setInviteId: Function,
+  getUserData: Function
 }
 
 const CreateLobby: FunctionComponent<CreateLobbyProps> = (props) => {
-  const { setInviteId } = props;
+  const { setInviteId, getUserData } = props;
   const [maxPlayers, setMaxPlayers] = React.useState<number | null>(2);
   const [hover, setHover] = React.useState(-1);
   const [name, setName] = React.useState<string>('');
@@ -50,11 +51,12 @@ const CreateLobby: FunctionComponent<CreateLobbyProps> = (props) => {
       password: password,
       is_private: isPrivate,
       max_players: maxPlayers,
-    }).then((response) => {
+    }).then(async (response) => {
       if(response.status === 200) {
         const json = response.data;
         console.log(response.status, json);
         setInviteId(json.invite_id);
+        await getUserData();
       }
       else if(response.status === 422) {
         // TODO

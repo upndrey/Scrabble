@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Players = exports.Symbols = exports.Sets = exports.Maps = exports.MapCells = exports.Lobbies = exports.Games = exports.Fields = exports.FieldCells = exports.CellModifiers = exports.Friends = exports.Users = void 0;
+exports.Hands = exports.Players = exports.Symbols = exports.Sets = exports.Maps = exports.MapCells = exports.Lobbies = exports.Games = exports.Fields = exports.FieldCells = exports.CellModifiers = exports.Friends = exports.Users = void 0;
 const Users_1 = __importDefault(require("../models/Users"));
 exports.Users = Users_1.default;
 const Friends_1 = __importDefault(require("../models/Friends"));
@@ -28,4 +28,6 @@ const Symbols_1 = __importDefault(require("../models/Symbols"));
 exports.Symbols = Symbols_1.default;
 const Players_1 = __importDefault(require("../models/Players"));
 exports.Players = Players_1.default;
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibW9kZWxzLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vZGIvbW9kZWxzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7OztBQUFBLDREQUFvQztBQWNsQyxnQkFkSyxlQUFLLENBY0w7QUFiUCxnRUFBd0M7QUFjdEMsa0JBZEssaUJBQU8sQ0FjTDtBQWJULDRFQUFvRDtBQWNsRCx3QkFkSyx1QkFBYSxDQWNMO0FBYmYsc0VBQThDO0FBYzVDLHFCQWRLLG9CQUFVLENBY0w7QUFiWiw4REFBc0M7QUFjcEMsaUJBZEssZ0JBQU0sQ0FjTDtBQWJSLDREQUFvQztBQWNsQyxnQkFkSyxlQUFLLENBY0w7QUFiUCxnRUFBd0M7QUFjdEMsa0JBZEssaUJBQU8sQ0FjTDtBQWJULGtFQUEwQztBQWN4QyxtQkFkSyxrQkFBUSxDQWNMO0FBYlYsMERBQWtDO0FBY2hDLGVBZEssY0FBSSxDQWNMO0FBYk4sMERBQWtDO0FBY2hDLGVBZEssY0FBSSxDQWNMO0FBYk4sZ0VBQXdDO0FBY3RDLGtCQWRLLGlCQUFPLENBY0w7QUFiVCxnRUFBd0M7QUFjdEMsa0JBZEssaUJBQU8sQ0FjTCJ9
+const Hands_1 = __importDefault(require("../models/Hands"));
+exports.Hands = Hands_1.default;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibW9kZWxzLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vZGIvbW9kZWxzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7OztBQUFBLDREQUFvQztBQWdCbEMsZ0JBaEJLLGVBQUssQ0FnQkw7QUFmUCxnRUFBd0M7QUFnQnRDLGtCQWhCSyxpQkFBTyxDQWdCTDtBQWZULDRFQUFvRDtBQWdCbEQsd0JBaEJLLHVCQUFhLENBZ0JMO0FBZmYsc0VBQThDO0FBZ0I1QyxxQkFoQkssb0JBQVUsQ0FnQkw7QUFmWiw4REFBc0M7QUFnQnBDLGlCQWhCSyxnQkFBTSxDQWdCTDtBQWZSLDREQUFvQztBQWdCbEMsZ0JBaEJLLGVBQUssQ0FnQkw7QUFmUCxnRUFBd0M7QUFnQnRDLGtCQWhCSyxpQkFBTyxDQWdCTDtBQWZULGtFQUEwQztBQWdCeEMsbUJBaEJLLGtCQUFRLENBZ0JMO0FBZlYsMERBQWtDO0FBZ0JoQyxlQWhCSyxjQUFJLENBZ0JMO0FBZk4sMERBQWtDO0FBZ0JoQyxlQWhCSyxjQUFJLENBZ0JMO0FBZk4sZ0VBQXdDO0FBZ0J0QyxrQkFoQkssaUJBQU8sQ0FnQkw7QUFmVCxnRUFBd0M7QUFnQnRDLGtCQWhCSyxpQkFBTyxDQWdCTDtBQWZULDREQUFvQztBQWdCbEMsZ0JBaEJLLGVBQUssQ0FnQkwifQ==
