@@ -8,6 +8,7 @@ import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
 import roboto from '../../fonts/roboto.json'
 import Cell from "../Cell/Cell";
+import GameBox from "../GameBox/GameBox";
  
 
 
@@ -123,7 +124,6 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
     >
       <ambientLight />
       <pointLight position={[10, 10, 10]} />
-
       <mesh
         scale={.25}
         position={[-1.4, -.0, .85]}
@@ -133,6 +133,16 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
       </mesh>
       {renderFieldCells()}
       {renderFieldSymbols()}
+
+      <mesh
+        scale={.25}
+        position={[3.1, -1.25, .91]}
+      >
+        <boxGeometry args={[11.2, 3.7, .5]} />
+        <meshStandardMaterial color='#9260F0' />
+      </mesh>
+      <GameBox></GameBox>
+
       <mesh
         scale={.25}
         position={[3.1, -2, .91]}
@@ -142,7 +152,6 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
       </mesh>
       {renderHandCells()}
       {renderHandSymbols()}
-
     </Canvas>
   );
 }
