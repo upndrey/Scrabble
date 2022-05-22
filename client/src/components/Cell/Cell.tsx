@@ -1,26 +1,76 @@
 import { ThreeEvent, Vector3 } from "@react-three/fiber";
+import axios from "axios";
 import React, { useEffect, useRef, FunctionComponent, useState } from "react";
 
 interface CellProps {
-  attachedSymbol: THREE.Mesh,
+  attachedSymbolMesh: THREE.Mesh,
+  attachedSymbolId: number,
   positionX: number,
   positionY: number,
-  color: string
+  color: string,
+  cellId: number | null,
+  slotId: number | null,
+  getFromSlotId: number | null,
+  getFromCellId: number | null
 }
 
 const Cell: FunctionComponent<CellProps> = (props) => {
-  const {color, attachedSymbol, positionX, positionY} = props;
+  const {
+    color, 
+    attachedSymbolMesh, 
+    attachedSymbolId, 
+    positionX, 
+    positionY, 
+    cellId, 
+    slotId,
+    getFromSlotId,
+    getFromCellId
+  } = props;
   const meshRef = useRef<THREE.Mesh>(null!)
   const [hovered, setHover] = useState(false)
   const [active, setActive] = useState(false)
-  const handlePointerUp = (e: ThreeEvent<PointerEvent>) => {
-    if(!attachedSymbol) 
+  const handlePointerUp = async (e: ThreeEvent<PointerEvent>) => {
+    if(!attachedSymbolMesh) 
       return;
-    attachedSymbol.position.x = e.object.position.x;
-    attachedSymbol.position.y = e.object.position.y;
-  }
+    attachedSymbolMesh.position.x = e.object.position.x;
+    attachedSymbolMesh.position.y = e.object.position.y;
+    console.log(
+      cellId, 
+      slotId,
+      getFromSlotId,
+      getFromCellId
+    );
+    if(cellId){
+      if(getFromSlotId)
+        await axios.post('http://localhost:3000/api/removeSymbolInHand', {
+          slot: getFromSlotId,
+        })
+      else
+        await axios.post('http://localhost:3000/api/removeSymbolInField', {
+          cellId: getFromCellId,
+        })
+      await axios.post('http://localhost:3000/api/insertSymbolInField', {
+        cellId: cellId,
+        symbolId: attachedSymbolId
+      })
+    }
+    else if(slotId) {
+      if(getFromSlotId)
+        await axios.post('http://localhost:3000/api/removeSymbolInHand', {
+          slot: getFromSlotId,
+        })
+      else
+        await axios.post('http://localhost:3000/api/removeSymbolInField', {
+          cellId: getFromCellId,
+        })
+      await axios.post('http://localhost:3000/api/insertSymbolInHand', {
+        slot: slotId,
+        symbolId: attachedSymbolId
+      })
+    }
+  } 
   const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
-    if(!attachedSymbol) 
+    if(!attachedSymbolMesh) 
       return;
   }
 

@@ -27,26 +27,26 @@ function App() {
 
   const getUserData = async () => {
     // devCode
-    console.log(devData);
-    setLogin(devData.login);
-    setLobby(devData.lobby);
-    setGame(devData.game); 
+    // console.log(devData);
+    // setLogin(devData.login);
+    // setLobby(devData.lobby);
+    // setGame(devData.game); 
 
-    // await axios.post('http://localhost:3000/api/getUserData').then((response) => {
-    //   if(response.status === 200) {
-    //     const json : UserData = response.data;
-    //     console.log(json);
-    //     setLogin(json.login);
-    //     setLobby(json.lobby);
-    //     setGame(json.game);
-    //   }
-    //   else if(response.status === 422) {
-    //     // TODO
-    //   }
-    //   else if(response.status === 400) {
-    //     // TODO
-    //   }
-    // });
+    await axios.post('http://localhost:3000/api/getUserData').then((response) => {
+      if(response.status === 200) {
+        const json : UserData = response.data;
+        console.log(json);
+        setLogin(json.login);
+        setLobby(json.lobby);
+        setGame(json.game);
+      }
+      else if(response.status === 422) {
+        // TODO
+      }
+      else if(response.status === 400) {
+        // TODO
+      }
+    });
   }
   
   useEffect(() => {

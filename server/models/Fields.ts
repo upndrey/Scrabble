@@ -25,7 +25,8 @@ class Fields extends Model {
           const cell = await FieldCells.findOrCreate({
             where: { 
               row: i,
-              col: j
+              col: j,
+              field_id: field[0].id
             },
             defaults: {
               field_id: field[0].id,

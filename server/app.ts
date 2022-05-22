@@ -17,6 +17,7 @@ import Fields from "./models/Fields";
 import Games from "./models/Games";
 import Symbols from "./models/Symbols";
 import Hands from "./models/Hands";
+import FieldCells from "./models/FieldCells";
 
 // Encrypt options
 const saltRounds = 10;
@@ -459,6 +460,214 @@ app.post('/api/nextTurn', async (req, res) => {
       turn: game.turn + 1
     });
 
+    status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    status = 422;
+  }
+  finally {
+    res.status(status);
+    res.json({});
+  }
+});
+
+app.post('/api/removeSymbolInField', async (req, res) => {
+  let status = 400;
+  try {
+    if(!req.session.game)
+      throw true;
+
+    const fieldCell = await FieldCells.findOne({
+      where: {
+        id: req.body.cellId
+      }
+    })
+    if(!fieldCell)
+      throw true;
+
+    await fieldCell?.update({
+      symbol_id: null
+    });
+    
+    status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    status = 422;
+  }
+  finally {
+    res.status(status);
+    res.json({});
+  }
+});
+
+app.post('/api/insertSymbolInField', async (req, res) => {
+  let status = 400;
+  try {
+    if(!req.session.game)
+      throw true;
+
+    const fieldCell = await FieldCells.findOne({
+      where: {
+        id: req.body.cellId
+      }
+    })
+    if(!fieldCell)
+      throw true;
+
+    await fieldCell?.update({
+      symbol_id: req.body.symbolId
+    });
+    
+    status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    status = 422;
+  }
+  finally {
+    res.status(status);
+    res.json({});
+  }
+});
+
+app.post('/api/removeSymbolInHand', async (req, res) => {
+  let status = 400;
+  try {
+    if(!req.session.game)
+      throw true;
+
+    const currentPlayer = await Players.findOne({
+      where: {
+        lobby_id: req.session.lobby.id,
+        slot: findSlotByTurn(req.session.game.turn, req.session.lobby.max_players)
+      },
+    });
+    if(!currentPlayer)
+      throw true;
+
+    const currentHand = await Hands.findOne({
+      where: {
+        player_id: currentPlayer.id
+      }
+    })
+
+    if(!currentHand)
+      throw true;
+    
+    switch(req.body.slot) {
+      case 1: 
+        await currentHand.update({
+          slot1: null
+        });
+        break;
+      case 2: 
+        await currentHand.update({
+          slot2: null
+        });
+        break;
+      case 3: 
+        await currentHand.update({
+          slot3: null
+        });
+        break;
+      case 4: 
+        await currentHand.update({
+          slot4: null
+        });
+        break;
+      case 5: 
+        await currentHand.update({
+          slot5: null
+        });
+        break;
+      case 6: 
+        await currentHand.update({
+          slot6: null
+        });
+        break;
+      case 7: 
+        await currentHand.update({
+          slot7: null
+        });
+        break;
+    }
+    
+    status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    status = 422;
+  }
+  finally {
+    res.status(status);
+    res.json({});
+  }
+});
+
+app.post('/api/insertSymbolInHand', async (req, res) => {
+  let status = 400;
+  try {
+    if(!req.session.game)
+      throw true;
+
+    const currentPlayer = await Players.findOne({
+      where: {
+        lobby_id: req.session.lobby.id,
+        slot: findSlotByTurn(req.session.game.turn, req.session.lobby.max_players)
+      },
+    });
+    if(!currentPlayer)
+      throw true;
+
+    const currentHand = await Hands.findOne({
+      where: {
+        player_id: currentPlayer.id
+      }
+    })
+
+    if(!currentHand)
+      throw true;
+    
+    switch(req.body.slot) {
+      case 1: 
+        await currentHand.update({
+          slot1: req.body.symbolId
+        });
+        break;
+      case 2: 
+        await currentHand.update({
+          slot2: req.body.symbolId
+        });
+        break;
+      case 3: 
+        await currentHand.update({
+          slot3: req.body.symbolId
+        });
+        break;
+      case 4: 
+        await currentHand.update({
+          slot4: req.body.symbolId
+        });
+        break;
+      case 5: 
+        await currentHand.update({
+          slot5: req.body.symbolId
+        });
+        break;
+      case 6: 
+        await currentHand.update({
+          slot6: req.body.symbolId
+        });
+        break;
+      case 7: 
+        await currentHand.update({
+          slot7: req.body.symbolId
+        });
+        break;
+    }
+    
     status = 200;
   }
   catch(err) {

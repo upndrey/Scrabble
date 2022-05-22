@@ -9,12 +9,27 @@ import { ThreeEvent, useFrame, useThree, Vector3 } from "@react-three/fiber";
 interface CellTextProps {
   symbol: number | null,
   game: UserData['game'],
-  attachSymbol: Function,
-  position: Vector3 | undefined
+  attachSymbolMesh: Function,
+  attachSymbolId: Function,
+  position: Vector3 | undefined,
+  setGetFromSlotId: Function | null,
+  setGetFromCellId: Function | null,
+  cellId: number | null,
+  slotId: number | null
 }
 
 const CellText: FunctionComponent<CellTextProps> = (props) => {
-  const {symbol, game, attachSymbol, position} = props;
+  const {
+    symbol, 
+    game, 
+    attachSymbolMesh, 
+    attachSymbolId, 
+    position,
+    setGetFromSlotId,
+    setGetFromCellId,
+    cellId,
+    slotId
+  } = props;
   const { viewport } = useThree()
   const meshRef = useRef<THREE.Mesh>(null!)
   const symbolMesh = useRef<THREE.Mesh>(null!)
@@ -49,14 +64,19 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
   const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
     console.log(e);
     setPointerDown(true);
-    attachSymbol(e.object)
-    e.stopPropagation()
+    attachSymbolMesh(e.object)
+    attachSymbolId(symbol)
+    if(setGetFromSlotId)
+      setGetFromSlotId(slotId)
+    if(setGetFromCellId)
+      setGetFromCellId(cellId)
   }
 
   const handlePointerUp = (e: ThreeEvent<PointerEvent>) => {
     console.log(e);
     setPointerDown(false);
-    attachSymbol(null!)
+    attachSymbolMesh(null!)
+    attachSymbolId(null!)
   }
   
   const handlePointerMove = (e:  ThreeEvent<PointerEvent>) => {
