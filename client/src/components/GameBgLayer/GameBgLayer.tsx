@@ -1,84 +1,35 @@
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, ThreeEvent, useFrame } from "@react-three/fiber";
 import React, { useEffect, useRef, FunctionComponent, useState } from "react";
 import * as THREE from "three";
+import { UserData } from "../../interfaces/UserData";
+import Symbol from '../Symbol/Symbol'
+import CellText from '../CellText/CellText'
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
+import roboto from '../../fonts/roboto.json'
+import Cell from "../Cell/Cell";
+ 
+
 
 interface GameBgLayerProps {
-  mapCells: any
-}
- 
-interface CellProps {
-  cellData: any
-}
-
-const Cell: FunctionComponent<CellProps> = (props) => {
-  const {cellData} = props;
-  const mesh = useRef<THREE.Mesh>(null!)
-  const [hovered, setHover] = useState(false)
-  const [active, setActive] = useState(false)
-  useEffect(() => {
-    if(cellData.modifier.color === 'lightblue')
-      cellData.modifier.color = '#42AAFF';
-  })
-  return (
-    <mesh
-      scale={.25}
-      position={
-        !active ? 
-        [-4.6 + cellData.cell.row / 2.5, -3.20 + cellData.cell.col / 2.5, 1]:
-        [-4.6 + cellData.cell.row / 2.5, -3.20 + cellData.cell.col / 2.5, .95]
-      }
-      ref={mesh}
-      onClick={(event) => setActive(!active)}
-      onPointerOver={(event) => setHover(true)}
-      onPointerOut={(event) => setHover(false)}>
-      <boxGeometry args={[1.35, 1.35, .25]} />
-      <meshStandardMaterial 
-        color={hovered || active ? '#442D70' : cellData.modifier.color} 
-      />
-    </mesh>
-  )
-}
- 
-interface HandProps {
-  index: number
-}
-
-const Hand: FunctionComponent<HandProps> = (props) => {
-  const {index} = props;
-  const mesh = useRef<THREE.Mesh>(null!)
-  const [hovered, setHover] = useState(false)
-  const [active, setActive] = useState(false)
-  return (
-    <mesh
-      scale={.25}
-      position={
-        !active ? 
-        [1.9 + index / 2.5, -2, 1]:
-        [1.9 + index / 2.5, -2, .95]
-      }
-      ref={mesh}
-      onClick={(event) => setActive(!active)}
-      onPointerOver={(event) => setHover(true)}
-      onPointerOut={(event) => setHover(false)}>
-      <boxGeometry args={[1.35, 1.35, .25]} />
-      <meshStandardMaterial color={hovered || active ? '#442D70' : '#6441A4'} />
-    </mesh>
-  )
+  userData: UserData,
 }
 
 const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
-  const {mapCells} = props;
-  useEffect(() => {
-    
-  }, []);
+  const {userData} = props;
+  const {login, game, lobby} = userData;
+  const [attachedSymbol, attachSymbol] = useState<THREE.Mesh>(null!)
 
   const renderCells = () => {
-    return mapCells.map((row: any) => {
+    return game?.mapCells.map((row: any) => {
       return row.map((cellData: any) => {
         return (
           <Cell
             key={`${cellData.cell.row}${cellData.cell.col}`}
-            cellData={cellData}
+            positionX={-4.6 + cellData.cell.row / 2.5}
+            positionY={-3.20 + cellData.cell.col / 2.5}
+            attachedSymbol={attachedSymbol}
+            color={cellData.modifier.color}
           />
         )
       })
@@ -86,23 +37,32 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
   }
 
   const renderHand = () => {
+    const currentPlayer = lobby?.players.find((user) => {
+      return user?.player.login === login
+    })
+    const handSymbols : any = currentPlayer?.hand;
     return [1, 2, 3, 4, 5, 6, 7].map((row: any, index) => {
       return (
-        <Hand
+        <CellText
           key={index}
-          index={index}
+          position={[1.9 + index / 2.5, -2, 1 ]}
+          symbol={handSymbols[`slot${row}`]}
+          game={game}
+          attachSymbol={attachSymbol}
         />
       )
     });
+    
   }
  
   return (
     <Canvas
-    onCreated={({camera}) => {
-    }}
+      onCreated={({camera}) => {
+      }}
     >
       <ambientLight />
       <pointLight position={[10, 10, 10]} />
+
       <mesh
         scale={.25}
         position={[-1.4, -.0, .85]}
@@ -111,6 +71,7 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
         <meshStandardMaterial color='#9260F0' />
       </mesh>
       {renderCells()}
+
       <mesh
         scale={.25}
         position={[3.1, -2, .91]}
@@ -119,6 +80,7 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
         <meshStandardMaterial color='#9260F0' />
       </mesh>
       {renderHand()}
+
     </Canvas>
   );
 }

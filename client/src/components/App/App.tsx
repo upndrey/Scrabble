@@ -27,6 +27,7 @@ function App() {
 
   const getUserData = async () => {
     // devCode
+    console.log(devData);
     setLogin(devData.login);
     setLobby(devData.lobby);
     setGame(devData.game); 
@@ -111,7 +112,7 @@ function App() {
           element={
             game ?
             <Game 
-              game={game}
+              userData={{game, lobby, login}}
             /> :
             ""
           } />
