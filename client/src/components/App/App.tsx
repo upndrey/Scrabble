@@ -31,7 +31,6 @@ function App() {
     // setLogin(devData.login);
     // setLobby(devData.lobby);
     // setGame(devData.game); 
-
     await axios.post('http://localhost:3000/api/getUserData').then((response) => {
       if(response.status === 200) {
         const json : UserData = response.data;

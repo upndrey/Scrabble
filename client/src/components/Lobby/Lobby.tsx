@@ -26,36 +26,25 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
     if(hasGame)
       navigate('/game');
   });
+  useEffect(() => {
+    if(!socketRef.current)
+      socketRef.current = io(SERVER_URL, {
+        query: { 
+          invite_id: lobby?.invite_id
+        }
+      })
+    
+    socketRef.current.on('connect', function() {
+      console.log('send room');
+      socketRef.current.emit('room', lobby?.invite_id);
+    });
+    socketRef.current.on('newUser', async (invide_id: string) => {
+      console.log('get newUser');
+      await getUserData();
+    })
+  }, []);
 
   useEffect(() => {
-    const referrer = document.referrer;
-    console.log("referrer url", referrer);
-    // создаем экземпляр сокета, передаем ему адрес сервера
-    // и записываем объект с названием комнаты в строку запроса "рукопожатия"
-    // socket.handshake.query.roomId
-    socketRef.current = io(SERVER_URL, {
-      // query: { roomId }
-    })
-
-    // отправляем событие добавления пользователя,
-    // в качестве данных передаем объект с именем и id пользователя
-    // socketRef.current.emit('user:add', { username, userId })
-
-    // обрабатываем получение списка пользователей
-    socketRef.current.on('users', (users: any) => {
-      // обновляем массив пользователей
-    })
-
-    // отправляем запрос на получение сообщений
-    socketRef.current.emit('message:get')
-
-    // обрабатываем получение сообщений
-    socketRef.current.on('messages', (messages: any) => {
-      // определяем, какие сообщения были отправлены данным пользователем,
-      // если значение свойства "userId" объекта сообщения совпадает с id пользователя,
-      // то добавляем в объект сообщения свойство "currentUser" со значением "true",
-      // иначе, просто возвращаем объект сообщения
-    })
   });
 
   if(!lobby)

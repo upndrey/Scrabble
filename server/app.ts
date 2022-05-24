@@ -193,7 +193,7 @@ app.get('/api/inviteLink/:id', async (req, res) => {
   finally {
     res.status(status);
     // res.json({});
-    res.redirect('http://localhost:3001/lobby');
+    res.redirect('http://localhost:3001/lobby?' + req.params.id);
   }
 })
 
@@ -204,7 +204,6 @@ app.post('/api/getUserData', async (req, res) => {
   let game: any = null;
   let lobbyBd;
   try {
-    console.log(req.session.user);
     if (!req.session.user) 
       throw 200;
     
@@ -503,7 +502,6 @@ app.post('/api/nextTurn', async (req, res) => {
     shuffle(symbols);
 
     await fillHand(symbols, currentHand);
-    console.log("game", game);
     game.set({
       turn: game.turn + 1
     });
@@ -827,14 +825,19 @@ const io = new Server(httpServer, {
     }
  });
 
-
-function socketInvite(socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) {
-  
-}
-
 io.on("connection", (socket) => {
-  // ...
-  console.log('runningMessage');
+  socket.on('room', async (room: string) => {
+    if(room){
+      socket.join(room);
+      socket.broadcast.to(room).emit('newUser', room);
+    }
+    console.log('get room');
+  });
+  // socket.on('newUser', (room: string) => {
+  //   console.log('get newUser');
+  //   console.log('send newUser');
+  //   socket.broadcast.to(room).emit('newUser', room);
+  // })
 });
 
 httpServer.listen(3000);
