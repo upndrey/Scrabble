@@ -62,7 +62,6 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
   }
 
   const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
-    console.log(e);
     setPointerDown(true);
     attachSymbolMesh(e.object)
     attachSymbolId(symbol)
@@ -73,7 +72,6 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
   }
 
   const handlePointerUp = (e: ThreeEvent<PointerEvent>) => {
-    console.log(e);
     setPointerDown(false);
     attachSymbolMesh(null!)
     attachSymbolId(null!)
@@ -111,8 +109,6 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
           position
         }
         onPointerUp={handlePointerUp}
-        onPointerOver={(e) => console.log('over')}
-        onPointerOut={(e) => console.log('out')}
         onPointerDown={handlePointerDown}
         onPointerMove={isPointerDown ? handlePointerMove : () => {}}
       >

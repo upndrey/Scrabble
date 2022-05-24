@@ -31,7 +31,7 @@ Games.init({
   turn: {
     type: DataTypes.INTEGER,
     allowNull: true,
-    defaultValue: -1
+    defaultValue: 0
   }
 }, {
   sequelize,

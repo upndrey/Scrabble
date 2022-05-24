@@ -11,7 +11,8 @@ interface CellProps {
   cellId: number | null,
   slotId: number | null,
   getFromSlotId: number | null,
-  getFromCellId: number | null
+  getFromCellId: number | null,
+  getUserData: Function
 }
 
 const Cell: FunctionComponent<CellProps> = (props) => {
@@ -24,7 +25,8 @@ const Cell: FunctionComponent<CellProps> = (props) => {
     cellId, 
     slotId,
     getFromSlotId,
-    getFromCellId
+    getFromCellId,
+    getUserData
   } = props;
   const meshRef = useRef<THREE.Mesh>(null!)
   const [hovered, setHover] = useState(false)
@@ -34,12 +36,6 @@ const Cell: FunctionComponent<CellProps> = (props) => {
       return;
     attachedSymbolMesh.position.x = e.object.position.x;
     attachedSymbolMesh.position.y = e.object.position.y;
-    console.log(
-      cellId, 
-      slotId,
-      getFromSlotId,
-      getFromCellId
-    );
     if(cellId){
       if(getFromSlotId)
         await axios.post('http://localhost:3000/api/removeSymbolInHand', {
@@ -53,6 +49,7 @@ const Cell: FunctionComponent<CellProps> = (props) => {
         cellId: cellId,
         symbolId: attachedSymbolId
       })
+      getUserData()
     }
     else if(slotId) {
       if(getFromSlotId)
@@ -67,6 +64,7 @@ const Cell: FunctionComponent<CellProps> = (props) => {
         slot: slotId,
         symbolId: attachedSymbolId
       })
+      getUserData()
     }
   } 
   const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {

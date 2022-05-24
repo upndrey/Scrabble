@@ -1,23 +1,67 @@
 import { Box } from "@mui/material";
-import { Canvas } from "@react-three/fiber";
-import { FunctionComponent, useEffect } from "react";
+import { Canvas, ThreeEvent } from "@react-three/fiber";
+import { FunctionComponent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserData } from "../../interfaces/UserData";
 import Controls from "../Controls/Controls";
 import GameBgLayer from "../GameBgLayer/GameBgLayer";
 
 interface GameProps {
-  userData: UserData
+  userData: UserData,
+  getUserData: Function
 }
  
 const Game: FunctionComponent<GameProps> = (props) => {
-  const {userData} = props;
-  const {game} = userData;
+  const {userData, getUserData} = props;
+  const {game, lobby, login} = userData;
+  const [controlsZIndex, setControlsZIndex] = useState<number>(1000)
+  const [attachedSymbolMesh, attachSymbolMesh] = useState<THREE.Mesh>(null!)
   const navigate = useNavigate();
   useEffect(() => {
     if(!game)
       navigate('/'); 
   });
+  const onControlsEnterHandler = () => {
+    if(attachedSymbolMesh)
+      setControlsZIndex(0);
+    else
+      setControlsZIndex(1000);
+  }
+  const onControlsOutHandler = () => {
+    setControlsZIndex(1000);
+  }
+  const findSlotByTurn = (turn: number, playersCount: number) => {
+    let slot = 1;
+    switch(turn % playersCount) {
+      case 0:
+        slot = 1;
+        break;
+      case 1:
+        slot = 2;
+        break;
+      case 2:
+        slot = 3;
+        break;
+      case 3:
+        slot = 4;
+        break;
+    }
+    return slot;
+  }
+  const isYourTurn = () => {
+    const currentPlayer = lobby?.players.find((player) => {
+      if(game && player)
+        return player.slot === findSlotByTurn(game?.gameInfo.turn, lobby.max_players)
+    })
+    return login === currentPlayer?.player.login
+  }
+  const currentPlayerName = () => {
+    const currentPlayer = lobby?.players.find((player) => {
+      if(game && player)
+        return player.slot === findSlotByTurn(game?.gameInfo.turn, lobby.max_players)
+    })
+    return currentPlayer?.player.login
+  }
   return (
     <>
       <Box
@@ -28,24 +72,18 @@ const Game: FunctionComponent<GameProps> = (props) => {
           top:"80px",
         }}
       >
-        <Canvas
-          onCreated={({camera}) => {
-          }}
-        >
-          <ambientLight />
-          <pointLight position={[10, 10, 10]} />
-          <mesh
-            scale={.25}
-            position={[3.1, 1.12, .91]}
-          >
-            <boxGeometry args={[11.2, 15, .5]} />
-            <meshStandardMaterial color='#9260F0' />
-          </mesh>
-        </Canvas>
         <Controls
-          width="372px"
-          height="499px"
+          width="374px"
+          height="500px"
           position={["839px", "12px"]}
+          zIndex={controlsZIndex}
+          onControlsEnterHandler={onControlsEnterHandler}
+          onControlsOutHandler={onControlsOutHandler}
+          lobby={userData['lobby']}
+          game={userData['game']}
+          isYourTurn={isYourTurn()}
+          currentPlayerName={currentPlayerName()}
+          getUserData={getUserData}
         ></Controls>
       </Box>
       <Box
@@ -58,6 +96,11 @@ const Game: FunctionComponent<GameProps> = (props) => {
       >
         <GameBgLayer 
           userData={userData}
+          onControlsEnterHandler={onControlsEnterHandler}
+          onControlsOutHandler={onControlsOutHandler}
+          attachedSymbolMesh={attachedSymbolMesh}
+          attachSymbolMesh={attachSymbolMesh}
+          getUserData={getUserData}
         />
       </Box> 
     </>

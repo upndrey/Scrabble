@@ -1,9 +1,11 @@
 import { Alert, Button, Divider, List, ListItemText, Paper, Slide, Snackbar, Stack, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import axios from "axios";
-import { FunctionComponent, useEffect, useState } from "react";
+import { FunctionComponent, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserData } from "../../interfaces/UserData";
+import { LoadingButton } from '@mui/lab';
+import { io } from "socket.io-client";
 
 interface LobbyProps {
   login: string
@@ -15,12 +17,47 @@ interface LobbyProps {
 const Lobby: FunctionComponent<LobbyProps> = (props) => {
   const {login, lobby, hasGame, getUserData} = props;
   const [copySuccess, setCopySuccess] = useState<boolean>(false);
+  const [isGameBeginStart, beginStartGame] = useState<boolean>(false);
   const [isGameStart, startGame] = useState<boolean>(false);
   const navigate = useNavigate();
+  const SERVER_URL = 'http://localhost:3000';
+  const socketRef = useRef<any>(null!)
   useEffect(() => {
     if(hasGame)
       navigate('/game');
   });
+
+  useEffect(() => {
+    const referrer = document.referrer;
+    console.log("referrer url", referrer);
+    // создаем экземпляр сокета, передаем ему адрес сервера
+    // и записываем объект с названием комнаты в строку запроса "рукопожатия"
+    // socket.handshake.query.roomId
+    socketRef.current = io(SERVER_URL, {
+      // query: { roomId }
+    })
+
+    // отправляем событие добавления пользователя,
+    // в качестве данных передаем объект с именем и id пользователя
+    // socketRef.current.emit('user:add', { username, userId })
+
+    // обрабатываем получение списка пользователей
+    socketRef.current.on('users', (users: any) => {
+      // обновляем массив пользователей
+    })
+
+    // отправляем запрос на получение сообщений
+    socketRef.current.emit('message:get')
+
+    // обрабатываем получение сообщений
+    socketRef.current.on('messages', (messages: any) => {
+      // определяем, какие сообщения были отправлены данным пользователем,
+      // если значение свойства "userId" объекта сообщения совпадает с id пользователя,
+      // то добавляем в объект сообщения свойство "currentUser" со значением "true",
+      // иначе, просто возвращаем объект сообщения
+    })
+  });
+
   if(!lobby)
     return (<div></div>);
   const renderPlayer = (player: any, index: number, lobby: UserData["lobby"]) => {
@@ -42,25 +79,14 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
       </Box>
     )
   }
-  const firstTurn = async () => {
-    await axios.post('http://localhost:3000/api/nextTurn').then(async (response) => {
-      if(response.status === 200) {
-      }
-      else if(response.status === 422) {
-        // TODO
-      }
-      else if(response.status === 400) {
-        // TODO
-      }
-    });
-  }
 
   const startGameHandler = () => {
+    beginStartGame(true)
     axios.post('http://localhost:3000/api/startGame').then(async (response) => {
       if(response.status === 200) {
-        await firstTurn();
         await getUserData();
         startGame(true);
+        beginStartGame(false);
       }
       else if(response.status === 422) {
         // TODO
@@ -78,7 +104,6 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
     for(let i = 0; i < lobby.max_players - lobby.players.length; i++) {
       lobby.players.push(null);
     }
-    console.log(lobby);
     const listPlayers = lobby.players.map((user: any, index) => {
       return renderPlayer(user?.player, index, lobby)
     });
@@ -154,9 +179,11 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
               Скопированно!
             </Alert>
           </Snackbar>
-          <Button
+          <LoadingButton
             variant="contained"
             size="large"
+            loading={isGameBeginStart}
+            disabled={isGameBeginStart}
             onClick={startGameHandler}
             sx={{
               backgroundColor: 'secondary.light',
@@ -169,7 +196,7 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
             }}
           >
             Начать игру
-          </Button>
+          </LoadingButton>
         </Box>
       </Paper>
     </Slide>

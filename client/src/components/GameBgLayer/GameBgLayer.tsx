@@ -14,12 +14,23 @@ import GameBox from "../GameBox/GameBox";
 
 interface GameBgLayerProps {
   userData: UserData,
+  onControlsEnterHandler: Function,
+  onControlsOutHandler: Function,
+  attachedSymbolMesh: THREE.Mesh,
+  attachSymbolMesh: Function,
+  getUserData: Function
 }
 
 const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
-  const {userData} = props;
+  const {
+    userData,
+    onControlsEnterHandler,
+    onControlsOutHandler,
+    attachedSymbolMesh,
+    attachSymbolMesh,
+    getUserData
+  } = props;
   const {login, game, lobby} = userData;
-  const [attachedSymbolMesh, attachSymbolMesh] = useState<THREE.Mesh>(null!)
   const [attachedSymbolId, attachSymbolId] = useState<number>(null!)
   const [getFromSlotId, setGetFromSlotId] = useState<number>(null!)
   const [getFromCellId, setGetFromCellId] = useState<number>(null!)
@@ -39,6 +50,7 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
             slotId={null}
             getFromCellId={getFromCellId}
             getFromSlotId={getFromSlotId}
+            getUserData={getUserData}
           />
         )
       })
@@ -84,6 +96,7 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
           slotId={row}
           getFromCellId={getFromCellId}
           getFromSlotId={getFromSlotId}
+          getUserData={getUserData}
         />
       )
     });
@@ -95,7 +108,7 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
     })
     const handSymbols : any = currentPlayer?.hand;
     return [1, 2, 3, 4, 5, 6, 7].map((row: any, index) => {
-      if(handSymbols[`slot${row}`])
+      if(handSymbols && handSymbols[`slot${row}`])
         return (
           <CellText
             key={index}
@@ -141,6 +154,16 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
         <boxGeometry args={[11.2, 3.7, .5]} />
         <meshStandardMaterial color='#9260F0' />
       </mesh>
+      <mesh
+        scale={.25}
+        position={[3.1, 1.12, .91]}
+        onPointerEnter={(e) => {onControlsEnterHandler()}}
+        onPointerOut={(e) => {onControlsOutHandler()}}
+      >
+        <boxGeometry args={[11.2, 15, .5]} />
+        <meshStandardMaterial color={'#9260F0'} />
+      </mesh>
+      
       <GameBox></GameBox>
 
       <mesh

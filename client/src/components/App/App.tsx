@@ -113,6 +113,7 @@ function App() {
             game ?
             <Game 
               userData={{game, lobby, login}}
+              getUserData={getUserData}
             /> :
             ""
           } />

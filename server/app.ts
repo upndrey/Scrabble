@@ -1,6 +1,6 @@
 import express from "express";
 import { createServer } from "http";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import * as http from 'http';
 import cors from 'cors';
 import { associate } from "./db/associations";
@@ -18,6 +18,9 @@ import Games from "./models/Games";
 import Symbols from "./models/Symbols";
 import Hands from "./models/Hands";
 import FieldCells from "./models/FieldCells";
+import { createClient } from "redis";
+import { DefaultEventsMap } from "socket.io/dist/typed-events";
+const connectRedis = require('connect-redis');
 
 // Encrypt options
 const saltRounds = 10;
@@ -51,13 +54,31 @@ var corsOptions = {
 };
 app.use(cors(corsOptions));
 
+
+const RedisStore = connectRedis(session)
+//Configure redis client
+const redisClient = createClient({
+    host: 'localhost',
+    port: 6379
+})
+
+redisClient.on('error', function (err: any) {
+    console.log('Could not establish a connection with redis. ' + err);
+});
+redisClient.on('connect', function (err: any) {
+    console.log('Connected to redis successfully');
+});
+
+const store = new RedisStore({ client: redisClient });
+
 // Session setup
 app.use(
   session({ 
+    store: store,
     resave: true,
     secret: '123456', 
     cookie:{
-      maxAge:36000,
+      maxAge: 1000 * 60 * 60,
       secure: false,
     },
     saveUninitialized: true
@@ -165,7 +186,6 @@ app.get('/api/inviteLink/:id', async (req, res) => {
     req.session.lobby = lobby;
     req.session.player = player[0];
     status = 200;
-     
   }
   catch(err) {
     status = 422;
@@ -184,7 +204,7 @@ app.post('/api/getUserData', async (req, res) => {
   let game: any = null;
   let lobbyBd;
   try {
-    
+    console.log(req.session.user);
     if (!req.session.user) 
       throw 200;
     
@@ -298,7 +318,7 @@ app.post('/api/startGame', async (req, res) => {
     });
     if(!game)
       throw true;
-
+    req.session.game = game;
     const {set, symbols} = await Sets.generateRuSet(game.id);
     if(!set)
       throw true;
@@ -306,6 +326,31 @@ app.post('/api/startGame', async (req, res) => {
     if(!field)
       throw true;
 
+    const allPlayers = await Players.findAll({
+      where: {
+        lobby_id: req.session.lobby.id,
+      },
+    });
+      
+    const setResult = await Sets.getSet(game.id, true);
+    if(!setResult || !setResult.symbols)
+      throw true;
+
+    shuffle(setResult.symbols);
+
+    for(let i = 0; i < allPlayers.length; i++) {
+      await allPlayers[i].update({
+        points: 0
+      });
+      const hand = await Hands.findOne({
+        where: {
+          player_id: allPlayers[i].id
+        }
+      });
+      if(setResult?.symbols && hand)
+        await fillHand(setResult.symbols, hand);
+    }
+    
     status = 200;
   }
   catch(err) {
@@ -317,8 +362,6 @@ app.post('/api/startGame', async (req, res) => {
     res.json({});
   }
 });
-
-
 
 function findSlotByTurn(turn: number, playersCount: number) {
   let slot = 1;
@@ -343,18 +386,91 @@ function shuffle(array: Array<any>) {
   array.sort(() => Math.random() - 0.5);
 }
 
+async function fillHand(symbols: Symbols[], currentHand: Hands) {
+  try{ 
+    let symbol = symbols.pop();
+    if(symbol) {
+      await currentHand.update({
+        slot1: currentHand.slot1 ? currentHand.slot1 : symbol.id
+      });
+      await symbol.update({
+        in_box: false
+      });
+    }
+  
+    symbol = symbols.pop();
+    if(symbol) {
+      await currentHand.update({
+        slot2: currentHand.slot2 ? currentHand.slot2 : symbol.id
+      });
+      await symbol.update({
+        in_box: false
+      });
+    }
+  
+    symbol = symbols.pop();
+    if(symbol) {
+      await currentHand.update({
+        slot3: currentHand.slot3 ? currentHand.slot3 : symbol.id
+      });
+      await symbol.update({
+        in_box: false
+      });
+    } 
+  
+    symbol = symbols.pop();
+    if(symbol) {
+      await currentHand.update({
+        slot4: currentHand.slot4 ? currentHand.slot4 : symbol.id
+      });
+      await symbol.update({
+        in_box: false
+      });
+    } 
+  
+    symbol = symbols.pop();
+    if(symbol) {
+      await currentHand.update({
+        slot5: currentHand.slot5 ? currentHand.slot5 : symbol.id
+      });
+      await symbol.update({
+        in_box: false
+      });
+    } 
+  
+    symbol = symbols.pop();
+    if(symbol) {
+      await currentHand.update({
+        slot6: currentHand.slot6 ? currentHand.slot6 : symbol.id
+      });
+      await symbol.update({
+        in_box: false
+      });
+    }
+  
+    symbol = symbols.pop();
+    if(symbol) {
+      await currentHand.update({
+        slot7: currentHand.slot7 ? currentHand.slot7 : symbol.id
+      });
+      await symbol.update({
+        in_box: false
+      });
+    }
+  }
+  catch(err) {
+    console.log(err);
+  }
+}
+
 app.post('/api/nextTurn', async (req, res) => {
   let status = 400;
   try {
-    let game : Games | null = req.session.game;
-    if(!game) {
-      game = await Games.findOne({
-        where: {
-          lobby_id: req.session.lobby.id
-        }
-      })
-    }
-
+    const game = await Games.findOne({
+      where: {
+        lobby_id: req.session.lobby.id
+      }
+    })
     if(!game)
       throw true;
 
@@ -366,11 +482,11 @@ app.post('/api/nextTurn', async (req, res) => {
     });
     if(!currentPlayer)
       throw true;
-
-    currentPlayer.update({
-      points: req.body.points
-    })
-
+    if(req.body.points) {
+      await currentPlayer.update({
+        points: currentPlayer.points + req.body.points
+      })
+    }
     const currentHand = await Hands.findOne({
       where: {
         player_id: currentPlayer.id
@@ -383,83 +499,15 @@ app.post('/api/nextTurn', async (req, res) => {
     const {set, symbols} = await Sets.getSet(game.id, true);
     if(!symbols)
       throw true;
-      
+    
     shuffle(symbols);
 
-    let symbol = symbols.pop();
-    if(symbol) {
-      currentHand.update({
-        slot1: currentHand.slot1 ? null : symbol.id
-      });
-      symbol.update({
-        in_box: false
-      });
-    }
-
-    symbol = symbols.pop();
-    if(symbol) {
-      currentHand.update({
-        slot2: currentHand.slot2 ? null : symbol.id
-      });
-      symbol.update({
-        in_box: false
-      });
-    }
-
-    symbol = symbols.pop();
-    if(symbol) {
-      currentHand.update({
-        slot3: currentHand.slot3 ? null : symbol.id
-      });
-      symbol.update({
-        in_box: false
-      });
-    } 
-
-    symbol = symbols.pop();
-    if(symbol) {
-      currentHand.update({
-        slot4: currentHand.slot4 ? null : symbol.id
-      });
-      symbol.update({
-        in_box: false
-      });
-    } 
-
-    symbol = symbols.pop();
-    if(symbol) {
-      currentHand.update({
-        slot5: currentHand.slot5 ? null : symbol.id
-      });
-      symbol.update({
-        in_box: false
-      });
-    } 
-
-    symbol = symbols.pop();
-    if(symbol) {
-      currentHand.update({
-        slot6: currentHand.slot6 ? null : symbol.id
-      });
-      symbol.update({
-        in_box: false
-      });
-    }
-
-    symbol = symbols.pop();
-    if(symbol) {
-      currentHand.update({
-        slot7: currentHand.slot7 ? null : symbol.id
-      });
-      symbol.update({
-        in_box: false
-      });
-    }
-
-    await game.update({
+    await fillHand(symbols, currentHand);
+    console.log("game", game);
+    game.set({
       turn: game.turn + 1
     });
-
+    await game.save();
     status = 200;
   }
   catch(err) {
@@ -470,6 +518,27 @@ app.post('/api/nextTurn', async (req, res) => {
     res.status(status);
     res.json({});
   }
+});
+
+app.post('/api/exitGame', async (req, res) => {
+  const player = await Players.findOne({
+    where: {
+      lobby_id: req.session.lobby.id,
+      user_id: req.body.user_id
+    },
+  });
+  if(!player)
+    throw true;;
+
+  const currentHand = await Hands.findOne({
+    where: {
+      player_id: player.id
+    }
+  })
+  if(!currentHand)
+    throw true;
+  await currentHand.destroy();
+  await player.destroy();
 });
 
 app.post('/api/removeSymbolInField', async (req, res) => {
@@ -710,13 +779,13 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-app.post('/api/logout', async (req, res) => {
+app.get('/api/logout', async (req, res) => {
   let status = 200;
-  req.session.destroy((err) => {
-    status = 422;
+  store.destroy(req.sessionID, function () {
+    req.session.destroy(() => {
+      res.redirect('http://localhost:3001')
+    });
   });
-  res.status(status);
-  res.json({});
 });
 
 app.post('/api/signup', async (req, res) => {
@@ -734,7 +803,6 @@ app.post('/api/signup', async (req, res) => {
     });
     if(user[1]) {
       status = 200;
-      console.log(req.session);
       if (!req.session.user) 
         req.session.user = user[0]
     }
@@ -758,6 +826,11 @@ const io = new Server(httpServer, {
         origin: "http://localhost:3001"
     }
  });
+
+
+function socketInvite(socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) {
+  
+}
 
 io.on("connection", (socket) => {
   // ...

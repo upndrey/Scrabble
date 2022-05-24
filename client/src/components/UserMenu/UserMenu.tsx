@@ -2,6 +2,7 @@ import { Mail, Notifications } from "@mui/icons-material";
 import { Avatar, Badge, Button, IconButton, MenuItem } from "@mui/material";
 import MenuUI from '@mui/material/Menu';
 import { Dispatch, Fragment, FunctionComponent, SetStateAction } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 interface UserMenuProps {
   login: string
@@ -12,16 +13,18 @@ interface UserMenuProps {
  
 const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
   const {login, anchorEl, setAnchorEl, setLogin} = props;
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     const response = await fetch('http://localhost:3000/api/logout', { 
-      method: 'POST',
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json'
       }
     });
     if(response.status === 200) {
       setLogin("");
+      navigate('/');
     }
     else if(response.status === 422) {
       // TODO
@@ -61,7 +64,17 @@ const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
     >
       <MenuItem onClick={handleMenuClose}>Профиль</MenuItem>
       <MenuItem onClick={handleMenuClose}>Настройки</MenuItem>
-      <MenuItem onClick={handleLogout}>Выход</MenuItem>
+      <MenuItem>
+        <a 
+          style={{
+            textDecoration: 'none',
+            color: 'inherit'
+          }}
+          href="http://localhost:3000/api/logout"
+        >
+            Выход
+        </a>
+      </MenuItem>
     </MenuUI>
   );
 

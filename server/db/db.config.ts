@@ -1,7 +1,8 @@
 import { Sequelize } from "sequelize";
 const sequelize = new Sequelize("scrabble", "root", "", {
   dialect: "mysql",
-  host: "localhost"
+  host: "localhost",
+  logging: false
 });
 
 async function test() {
