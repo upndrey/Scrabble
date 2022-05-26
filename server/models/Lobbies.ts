@@ -5,6 +5,7 @@ class Lobbies extends Model {
   declare id: number;
   declare host_id: number;
   declare name: string;
+  declare password: string;
   declare is_private: boolean;
   declare is_closed: boolean;
   declare max_players: number;

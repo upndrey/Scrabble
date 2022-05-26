@@ -20,6 +20,7 @@ import Hands from "./models/Hands";
 import FieldCells from "./models/FieldCells";
 import { createClient } from "redis";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import Friends from "./models/Friends";
 const connectRedis = require('connect-redis');
 
 // Encrypt options
@@ -818,6 +819,143 @@ app.post('/api/signup', async (req, res) => {
   }
 });
 
+app.post('/api/addFriend', async (req, res) => {
+  let status = 400;
+  try {
+    const user = await Users.findOne({
+      where: {
+        login: req.body.login,
+      }
+    });
+    const friend = await Users.findOne({
+      where: {
+        login: req.body.friend,
+      }
+    });
+    if(user && friend) {
+      const friendBackDb = await Friends.findOne({
+        where: {
+          user_id: friend.id,
+          friend_id: user.id
+        }
+      });
+      const friendDb = await Friends.findOrCreate({
+        where: {
+          user_id: user.id,
+          friend_id: friend.id
+        },
+        defaults: {
+          user_id: user.id,
+          friend_id: friend.id
+        }
+      });
+
+      if(friendBackDb) {
+        await friendDb[0].update({
+          is_accepted: true
+        });
+        await friendBackDb.update({
+          is_accepted: true
+        });
+      }
+      status = 200;
+    }
+    else
+      status = 422;
+  }
+  catch(err) {
+    status = 422;
+  }
+  finally {
+    res.status(status);
+    res.json({});
+  }
+});
+
+app.post('/api/removeFriend', async (req, res) => {
+  let status = 400;
+  try {
+    const user = await Users.findOne({
+      where: {
+        login: req.body.login,
+      }
+    });
+    const friend = await Users.findOne({
+      where: {
+        login: req.body.friend,
+      }
+    });
+    if(user && friend) {
+      const friendBackDb = await Friends.findOne({
+        where: {
+          user_id: friend.id,
+          friend_id: user.id
+        }
+      });
+      const friendDb = await Friends.findOne({
+        where: {
+          user_id: user.id,
+          friend_id: friend.id
+        }
+      });
+      await friendDb?.destroy();
+      await friendBackDb?.destroy();
+      status = 200;
+    }
+    else
+      status = 422;
+  }
+  catch(err) {
+    status = 422;
+  }
+  finally {
+    res.status(status);
+    res.json({});
+  }
+});
+
+app.post('/api/findAllFriends', async (req, res) => {
+  let status = 400;
+  let friends : Users[] = [];
+  try {
+    const user = await Users.findOne({
+      where: {
+        login: req.body.login
+      }
+    });
+    if(user) {
+      friends = await Users.findAll({
+        attributes: ['login'],
+        where: {
+          id: user.id
+        },
+        include: {
+          model: Users,
+          attributes: ['login'],
+          as: 'friend',
+          required: true,
+          through: {
+            where: {
+              is_accepted: true
+            }
+          }
+        }
+      });
+      status = 200;
+    } 
+    else
+      status = 422;
+  }
+  catch(err) {
+    console.log(err);
+    status = 422;
+  }
+  finally {
+    res.status(status);
+    res.json(friends);
+  }
+});
+
 const httpServer = createServer(app);
 const io = new Server(httpServer, { 
     cors: {
@@ -833,11 +971,26 @@ io.on("connection", (socket) => {
     }
     console.log('get room');
   });
-  // socket.on('newUser', (room: string) => {
-  //   console.log('get newUser');
-  //   console.log('send newUser');
-  //   socket.broadcast.to(room).emit('newUser', room);
-  // })
+  socket.on('addFriend', async (login: string) => {
+    const user = await Users.findOne({
+      where: {
+        login: login
+      }
+    })
+    if(user?.socket_id)
+      socket.broadcast.to(user.socket_id).emit('sendFriendInvite', user.login);
+  });
+  socket.on('login', async (login: string, socket_id: string) => {
+    const user = await Users.findOne({
+      where: {
+        login: login
+      }
+    })
+    await user?.update({
+      socket_id: socket_id
+    })
+    // socket.broadcast.to(room).emit('newUser', room);
+  });
 });
 
 httpServer.listen(3000);

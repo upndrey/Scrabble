@@ -62,7 +62,7 @@ const Signup: FunctionComponent<SignupProps> = (props) => {
               padding: '10px'
             }}
           >
-            Text in a modal
+            Регистрация
           </Typography>
           <form onSubmit={handleSubmit}>
             <Box
@@ -112,7 +112,7 @@ const Signup: FunctionComponent<SignupProps> = (props) => {
                   width: '100%',
                 }}
               >
-                Создать
+                Зарегистрироваться
               </Button> 
             </Box>
           </form>

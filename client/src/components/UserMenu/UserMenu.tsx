@@ -1,8 +1,9 @@
 import { Mail, Notifications } from "@mui/icons-material";
 import { Avatar, Badge, Button, IconButton, MenuItem } from "@mui/material";
 import MenuUI from '@mui/material/Menu';
-import { Dispatch, Fragment, FunctionComponent, SetStateAction } from "react";
+import { Dispatch, Fragment, FunctionComponent, SetStateAction, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { socket } from "../../features/socket";
 
 interface UserMenuProps {
   login: string
@@ -14,31 +15,32 @@ interface UserMenuProps {
 const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
   const {login, anchorEl, setAnchorEl, setLogin} = props;
   const navigate = useNavigate();
+  const [notifications, setNotifications] = useState<Array<any>>([]);
+  const [anchorNotifEl, setAnchorNotifEl] = useState<null | HTMLElement>(null);
+  
+  useEffect(() => {
+    socket.on('sendFriendInvite', (login: string) => {
+      let tempArray = notifications;
+      tempArray.push({
+        event: 'friendInvite',
+        from: login
+      });
+      setNotifications(tempArray);
+    })
+  }, [])
 
-  const handleLogout = async () => {
-    const response = await fetch('http://localhost:3000/api/logout', { 
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-    if(response.status === 200) {
-      setLogin("");
-      navigate('/');
-    }
-    else if(response.status === 422) {
-      // TODO
-    }
-    else if(response.status === 400) {
-      // TODO
-    }
-    handleMenuClose();
-  }
+  const handleNotificationsOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorNotifEl(event.currentTarget);
+  };
+
+  const isNotificationsOpen = Boolean(anchorNotifEl);
+  const handleNotificationsClose = () => {
+    setAnchorNotifEl(null);
+  };
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
-
 
   const isMenuOpen = Boolean(anchorEl);
   const handleMenuClose = () => {
@@ -78,21 +80,77 @@ const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
     </MenuUI>
   );
 
+  const renderNotifList = (arr: Array<any>) => {
+    if(!arr.length)
+      return (
+        <MenuItem>
+          Уведомлений нет
+        </MenuItem>
+      )
+    return arr.map((row, i) => {
+      if(row.event === "friendInvite")
+        return (
+          <MenuItem
+            key={i}
+          >
+            Пользователь {row.login} приглашает вас в друзья
+            <Button 
+              variant="contained"
+            >
+              Принять
+            </Button>
+          </MenuItem>
+        )
+      else if(row.event === "gameInvite")
+        return (
+          <MenuItem
+            key={i}
+          >
+            Пользователь {row.login} приглашает вас в игру
+            <Button 
+              variant="contained"
+            >
+              Принять
+            </Button>
+          </MenuItem>
+        )
+    })
+  }
+
+  const renderNotifications = (
+    <MenuUI
+      anchorEl={anchorNotifEl}
+      anchorOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
+      }}
+      keepMounted
+      transformOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
+      }}
+      open={isNotificationsOpen}
+      onClose={handleNotificationsClose}
+    >
+      {renderNotifList(notifications)}
+    </MenuUI>
+  );
+
 
   return (
     <Fragment>
-        <IconButton size="large" aria-label="show 4 new mails" color="inherit">
+        <IconButton size="large" color="inherit">
           <Badge badgeContent={4} color="error">
             <Mail />
           </Badge>
         </IconButton>
         <IconButton
           size="large"
-          aria-label="show 17 new notifications"
           color="inherit"
+          onClick={handleNotificationsOpen}
         >
-          <Badge badgeContent={17} color="error">
-            <Notifications />
+          <Badge badgeContent={notifications.length} color="error">
+            <Notifications/>
           </Badge>
         </IconButton>
         <Button color="inherit" onClick={handleProfileMenuOpen}>
@@ -102,6 +160,7 @@ const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
           {login}
         </Button>
         {renderProfileMenu}
+        {renderNotifications}
     </Fragment>
   );
 }

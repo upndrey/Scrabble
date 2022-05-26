@@ -1,5 +1,5 @@
 import Login from '../Login/Login';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import CreateLobby from '../CreateLobby/CreateLobby';
 import FriendsList from '../FriendsList/FriendsList';
@@ -12,6 +12,7 @@ import Signup from '../Signup/Signup';
 import axios from 'axios';
 import { UserData } from '../../interfaces/UserData';
 import { devData } from '../../features/devData';
+import {socket} from '../../features/socket';
 axios.defaults.withCredentials = true;
 
 
@@ -35,6 +36,9 @@ function App() {
       if(response.status === 200) {
         const json : UserData = response.data;
         console.log(json);
+        if(json.login !== login) {
+          socket.emit('login', json.login, socket.id)
+        }
         setLogin(json.login);
         setLobby(json.lobby);
         setGame(json.game);
@@ -54,7 +58,7 @@ function App() {
 
   return (
     <div className="App">
-      <StartGameButton></StartGameButton>
+      {!lobby && login ? <StartGameButton></StartGameButton> : ""}
       <Menu 
         setLoginOpen={setLoginOpen}
         openFriends={openFriends}
@@ -75,7 +79,10 @@ function App() {
         setSignupOpen={setSignupOpen}
         getUserData={getUserData}
       ></Signup>
-      <FriendsList isFriendsOpen={isFriendsOpen}></FriendsList>
+      <FriendsList 
+        isFriendsOpen={isFriendsOpen}
+        login={login}
+      ></FriendsList>
       <Routes>
         <Route 
           path='/createLobby' 

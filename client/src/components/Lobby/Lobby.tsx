@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { UserData } from "../../interfaces/UserData";
 import { LoadingButton } from '@mui/lab';
 import { io } from "socket.io-client";
+import {socket} from '../../features/socket';
 
 interface LobbyProps {
   login: string
@@ -20,25 +21,17 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
   const [isGameBeginStart, beginStartGame] = useState<boolean>(false);
   const [isGameStart, startGame] = useState<boolean>(false);
   const navigate = useNavigate();
-  const SERVER_URL = 'http://localhost:3000';
-  const socketRef = useRef<any>(null!)
   useEffect(() => {
     if(hasGame)
       navigate('/game');
   });
   useEffect(() => {
-    if(!socketRef.current)
-      socketRef.current = io(SERVER_URL, {
-        query: { 
-          invite_id: lobby?.invite_id
-        }
-      })
     
-    socketRef.current.on('connect', function() {
+    socket.on('connect', function() {
       console.log('send room');
-      socketRef.current.emit('room', lobby?.invite_id);
+      socket.emit('room', lobby?.invite_id);
     });
-    socketRef.current.on('newUser', async (invide_id: string) => {
+    socket.on('newUser', async (invide_id: string) => {
       console.log('get newUser');
       await getUserData();
     })

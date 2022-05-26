@@ -6,6 +6,7 @@ class Users extends Model {
   declare login: string;
   declare password: string;
   declare is_online: boolean;
+  declare socket_id: string;
 }
 
 Users.init({
@@ -26,6 +27,10 @@ Users.init({
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: true
+  },
+  socket_id: {
+    type: DataTypes.STRING,
+    allowNull: true
   }
 }, {
   sequelize,

@@ -21,13 +21,13 @@ export const associate = function() {
   //Friends
   Users.belongsToMany(Users, {
     through: Friends, 
-    as: 'Users',
+    as: 'user',
     foreignKey: 'user_id'
   });
 
   Users.belongsToMany(Users, {
     through: Friends, 
-    as: 'Friends',
+    as: 'friend',
     foreignKey: 'friend_id'
   });
 

@@ -40,6 +40,8 @@ const Menu: React.FunctionComponent<MenuProps> = (props) => {
   } = props;
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
+  
+
   const handleLogin = () => {
     setLoginOpen(true);
   };

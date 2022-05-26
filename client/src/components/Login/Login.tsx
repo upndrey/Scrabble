@@ -5,6 +5,8 @@ import Modal from '@mui/material/Modal';
 import { Button, Paper, TextField } from "@mui/material";
 import styled from "styled-components";
 import axios from 'axios';
+import { io } from "socket.io-client";
+import {socket} from '../../features/socket';
 axios.defaults.withCredentials = true;
 
 interface LoginProps {
@@ -30,8 +32,12 @@ const Login: FunctionComponent<LoginProps> = (props) => {
       password: password
     }).then((response) => {
       if(response.status === 200) {
+        if(login !== "") {
+          socket.emit('login', login, socket.id)
+        }
         getUserData();
         handleLoginClose();
+        
       }
       else if(response.status === 422) {
         // TODO
@@ -68,7 +74,7 @@ const Login: FunctionComponent<LoginProps> = (props) => {
               padding: '10px'
             }}
           >
-            Text in a modal
+            Вход
           </Typography>
           <form onSubmit={handleSubmit}>
             <Box
@@ -115,7 +121,7 @@ const Login: FunctionComponent<LoginProps> = (props) => {
                   width: '100%',
                 }}
               >
-                Создать
+                Войти
               </Button> 
             </Box>
           </form>
