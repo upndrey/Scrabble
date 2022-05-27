@@ -1,4 +1,4 @@
-import { Alert, Button, Divider, List, ListItemText, Paper, Slide, Snackbar, Stack, Typography } from "@mui/material";
+import { Alert, Button, Divider, List, IconButton, Paper, Slide, Snackbar, Stack, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import axios from "axios";
 import { FunctionComponent, useEffect, useRef, useState } from "react";
@@ -7,6 +7,7 @@ import { UserData } from "../../interfaces/UserData";
 import { LoadingButton } from '@mui/lab';
 import { io } from "socket.io-client";
 import {socket} from '../../features/socket';
+import CloseIcon from '@mui/icons-material/Close';
 
 interface LobbyProps {
   login: string
@@ -26,19 +27,59 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
       navigate('/game');
   });
   useEffect(() => {
-    
-    socket.on('connect', function() {
-      console.log('send room');
-      socket.emit('room', lobby?.invite_id);
-    });
+    console.log(1);
+    socket.emit('room', lobby?.invite_id);
     socket.on('newUser', async (invide_id: string) => {
       console.log('get newUser');
       await getUserData();
     })
+    socket.on('removedFromLobby', async () => {
+      console.log('removed');
+      socket.emit('leaveRoom', lobby?.invite_id);
+      const apiUrl = 'http://localhost:3000/api/removeLobbyData';
+      await axios.post(apiUrl)
+      await getUserData();
+    })
   }, []);
 
-  useEffect(() => {
-  });
+  const handleRemove = (id: number) => {
+    console.log(id);
+    const apiUrl = 'http://localhost:3000/api/removeFromLobby';
+    if(login)
+      axios.post(apiUrl,{
+        player_id: id
+      }).then(async (response) => { 
+        if(response.status === 200) { 
+          socket.emit('removeFromRoom', id)
+          await getUserData();
+        }  
+        else if(response.status === 422) {
+          // TODO
+        }
+        else if(response.status === 400) {
+          // TODO
+        }
+      });
+  }
+
+  const handleCloseLobby = () => {
+    const apiUrl = 'http://localhost:3000/api/closeLobby';
+    if(login && lobby)
+      axios.post(apiUrl,{
+        invite_id: lobby.invite_id
+      }).then(async (response) => { 
+        if(response.status === 200) { 
+          socket.emit('removeRoom', lobby.invite_id)
+          await getUserData();
+        }  
+        else if(response.status === 422) {
+          // TODO
+        }
+        else if(response.status === 400) {
+          // TODO
+        }
+      });
+  }
 
   if(!lobby)
     return (<div></div>);
@@ -47,7 +88,11 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
       <Box
         key={index}
         sx={{
-          p:1
+          pl:1,
+          pr:1,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
         }}
       >
         <Typography
@@ -58,6 +103,20 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
         >
           {player ? player.login : "Место свободно"}
         </Typography>
+        {
+            lobby?.players[0]?.player.login === login && player?.id && player?.login !== login ?
+            <IconButton
+              size="large"
+              color="inherit"
+              sx={{
+                color: 'primary.contrastText'
+              }}
+              onClick={handleRemove.bind(this, player?.id)}
+            >
+              <CloseIcon />
+            </IconButton> :
+            ""
+          }
       </Box>
     )
   }
@@ -82,10 +141,9 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
   const renderListPlayers = (lobby: UserData["lobby"]) => {
     if(!lobby)
       return "";
-      
-    for(let i = 0; i < lobby.max_players - lobby.players.length; i++) {
-      lobby.players.push(null);
-    }
+
+    while(lobby.players.length !== lobby.max_players)
+    lobby.players.push(null);
     const listPlayers = lobby.players.map((user: any, index) => {
       return renderPlayer(user?.player, index, lobby)
     });
@@ -101,7 +159,7 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
           marginTop: '0px',
           backgroundColor: 'primary.main',
           zIndex: 999,
-          height: '399px',
+          height: '445px',
           overflow: 'hidden',
           display: 'inline-block',
           position: 'relative',
@@ -125,7 +183,7 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
           spacing={1}
           sx={{
             mt:1,
-            mb:1,
+            mb:1
           }}
         >
           {renderListPlayers(lobby)}
@@ -161,24 +219,43 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
               Скопированно!
             </Alert>
           </Snackbar>
-          <LoadingButton
-            variant="contained"
-            size="large"
-            loading={isGameBeginStart}
-            disabled={isGameBeginStart}
-            onClick={startGameHandler}
-            sx={{
-              backgroundColor: 'secondary.light',
-              color: 'primary.contrastText',
-              m:1,
-              width: '500px',
-              '&:hover': {
-                backgroundColor: 'secondary.dark'
-              }
-            }}
-          >
-            Начать игру
-          </LoadingButton>
+          {
+            lobby.players[0]?.player.login === login ?
+            <LoadingButton
+              variant="contained"
+              size="large"
+              loading={isGameBeginStart}
+              disabled={isGameBeginStart}
+              onClick={startGameHandler}
+              sx={{
+                backgroundColor: 'secondary.light',
+                color: 'primary.contrastText',
+                m:1,
+                width: '500px',
+                '&:hover': {
+                  backgroundColor: 'secondary.dark'
+                }
+              }}
+            >
+              Начать игру
+            </LoadingButton> :
+            ""
+          }
+          {
+            lobby.players[0]?.player.login === login ?
+            <Button
+              variant="contained"
+              color="error"
+              sx={{
+                m:1,
+                width: '500px',
+              }}
+              onClick={handleCloseLobby}
+            >
+              Закрыть лобби
+            </Button> :
+            ""
+          }
         </Box>
       </Paper>
     </Slide>

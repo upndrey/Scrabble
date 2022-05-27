@@ -24,7 +24,7 @@ interface MenuProps {
   setLogin: Function,
   login: string,
   hasLobby: boolean,
-  hasGame: boolean
+  hasGame: boolean,
 }
  
 const Menu: React.FunctionComponent<MenuProps> = (props) => {
@@ -36,7 +36,7 @@ const Menu: React.FunctionComponent<MenuProps> = (props) => {
     setLogin,
     login,
     hasLobby,
-    hasGame
+    hasGame,
   } = props;
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 

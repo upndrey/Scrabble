@@ -79,10 +79,15 @@ function App() {
         setSignupOpen={setSignupOpen}
         getUserData={getUserData}
       ></Signup>
-      <FriendsList 
-        isFriendsOpen={isFriendsOpen}
-        login={login}
-      ></FriendsList>
+      {
+        login ? 
+        <FriendsList 
+          isFriendsOpen={isFriendsOpen}
+          login={login}
+          lobby={lobby}
+        ></FriendsList> : 
+        ""
+      }
       <Routes>
         <Route 
           path='/createLobby' 

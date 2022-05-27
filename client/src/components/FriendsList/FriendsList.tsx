@@ -1,4 +1,4 @@
-import { Avatar, Badge, Button, Checkbox, Divider, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Menu, MenuItem, Paper, Slide, TextField, Typography } from "@mui/material";
+import { Avatar, Badge, Button, Checkbox, Divider, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Menu, MenuItem, Paper, Slide, Stack, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import axios from "axios";
 import React, { EventHandler, FormEvent, FunctionComponent, MouseEventHandler, useEffect, useRef, useState } from "react";
@@ -6,10 +6,12 @@ import styled from "styled-components";
 import CloseIcon from '@mui/icons-material/Close';
 import { Notifications } from "@mui/icons-material";
 import {socket} from '../../features/socket';
+import { UserData } from "../../interfaces/UserData";
 
 interface FriendsListProps {
   isFriendsOpen: boolean,
-  login: string
+  login: string,
+  lobby: UserData['lobby']
 }
 
 const CssTextField = styled(TextField)({
@@ -33,21 +35,20 @@ const CssTextField = styled(TextField)({
 });
 
 const FriendsList: FunctionComponent<FriendsListProps> = (props) => {
-  const { isFriendsOpen, login } = props;
+  const { isFriendsOpen, login, lobby} = props;
   const [name, setName] = useState<string>('');
   const [friendsList, setFriendsList] = useState<Array<any>>([]);
 
   useEffect(() => {
-    getFriendsList();
-
-    
-    socket.on('connect', function() {
-      console.log('send room');
-      // socketRef.current.emit('room', lobby?.invite_id);
-    });
-    socket.on('newUser', async (invide_id: string) => {
-      console.log('get newUser');
+    socket.on('removeFriend', () => {
+      console.log("remove");
+      getFriendsList();
     })
+    socket.on('friendAdded', () => {
+      console.log("added");
+      getFriendsList();
+    })
+    getFriendsList();
   }, []);
 
   const getFriendsList = () => {
@@ -59,8 +60,8 @@ const FriendsList: FunctionComponent<FriendsListProps> = (props) => {
       }).then(async (response) => { 
         if(response.status === 200) {  
           const json = response.data; 
-          setFriendsList(json);
-          console.log(friendsList);  
+          setFriendsList(json[0].friend);
+          console.log(json[0].friend);  
         }  
         else if(response.status === 422) {
           // TODO
@@ -90,13 +91,14 @@ const FriendsList: FunctionComponent<FriendsListProps> = (props) => {
     });
   }
 
-  const handleRemove = () => {
+  const handleRemove = (friendName: string) => {
     const apiUrl = 'http://localhost:3000/api/removeFriend';
     axios.post(apiUrl,{
       login: login,
-      name: name
+      friend: friendName
     }).then(async (response) => {
       if(response.status === 200) {
+        socket.emit('removeFriend', login, friendName);
         getFriendsList();
       }
       else if(response.status === 422) {
@@ -106,6 +108,10 @@ const FriendsList: FunctionComponent<FriendsListProps> = (props) => {
         // TODO
       }
     });
+  }
+
+  const inviteInLobby = (friendName: string) => {
+    socket.emit('inviteInLobby', friendName, lobby?.invite_id);
   }
 
   return ( 
@@ -154,42 +160,69 @@ const FriendsList: FunctionComponent<FriendsListProps> = (props) => {
             }
           }}
         >
-        {friendsList.map((value) => {
-          if(!value.friend)
+        {friendsList?.map((value, i) => {
+          if(!value)
             return "";
           return (
             <ListItem
-              key={value} 
+              key={i} 
               disablePadding
             >
-              <ListItemButton>
-                <ListItemAvatar>
-                  <Avatar
-                    alt={`Avatar n°${value + 1}`}
-                    src={`/static/images/avatar/${value + 1}.jpg`}
-                  />
-                </ListItemAvatar>
-                <ListItemText 
+              <Stack
+                direction="row"
+                divider={<Divider orientation="vertical" flexItem />}
+                spacing={2}
+                sx={{
+                  display: 'flex',
+                  width: '100%',
+                  alignItems: 'center',
+                  paddingLeft: '10px',
+                  paddingRight: '10px'
+                }}
+              >
+                
+                <Typography
+                  variant="body1"
                   sx={{
-                    color: 'primary.contrastText'
+                    color: 'primary.contrastText',
+                    flexGrow: 1,
+                    width: '100%'
                   }}
-                  primary={`Friend ${value + 1}`} 
-                />
-                <ListItem>
+                >
+                  {value.login}
+                </Typography>
+                <Box
+                sx={{
+                  display: 'flex'
+                }}
+                >
+                  {
+                    lobby ? 
+                    <IconButton
+                      size="large"
+                      color="inherit"
+                      sx={{
+                        color: 'primary.contrastText'
+                      }}
+                      onClick={inviteInLobby.bind(this, value.login)}
+                    >
+                      <Notifications />
+                    </IconButton> : 
+                    ""
+                  }
+                  
                   <IconButton
                     size="large"
                     color="inherit"
-                  >
-                    <Notifications />
-                  </IconButton>
-                  <IconButton
-                    size="large"
-                    color="inherit"
+                    sx={{
+                      color: 'primary.contrastText'
+                    }}
+                    onClick={handleRemove.bind(this, value.login)}
                   >
                     <CloseIcon />
                   </IconButton>
-                </ListItem>
-              </ListItemButton>
+                </Box>
+              </Stack>
             </ListItem>
           );
         })}

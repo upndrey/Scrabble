@@ -1,15 +1,17 @@
 import { Mail, Notifications } from "@mui/icons-material";
 import { Avatar, Badge, Button, IconButton, MenuItem } from "@mui/material";
 import MenuUI from '@mui/material/Menu';
+import axios from "axios";
 import { Dispatch, Fragment, FunctionComponent, SetStateAction, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { socket } from "../../features/socket";
+import { Link } from '@mui/material';
 
 interface UserMenuProps {
   login: string
   anchorEl: HTMLElement | null
   setAnchorEl: Dispatch<SetStateAction<HTMLElement | null>>
-  setLogin: Function
+  setLogin: Function,
 }
  
 const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
@@ -19,15 +21,57 @@ const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
   const [anchorNotifEl, setAnchorNotifEl] = useState<null | HTMLElement>(null);
   
   useEffect(() => {
-    socket.on('sendFriendInvite', (login: string) => {
-      let tempArray = notifications;
+    socket.on('friendInvite', (login: string) => {
+      console.log('friendInvite')
+      let tempArray =  JSON.parse(JSON.stringify(notifications));
       tempArray.push({
         event: 'friendInvite',
         from: login
       });
       setNotifications(tempArray);
+      console.log(notifications);
+    })
+    socket.on('inviteInLobby', (invite_id: string) => {
+      console.log('inviteInLobby')
+      let tempArray =  JSON.parse(JSON.stringify(notifications));
+      tempArray.push({
+        event: 'inviteInLobby',
+        invite_id: invite_id
+      });
+      setNotifications(tempArray);
+      console.log(notifications);
     })
   }, [])
+
+  const addFriend = (name: string, index: number) => {
+    const apiUrl = 'http://localhost:3000/api/addFriend';
+    console.log(login);
+    axios.post(apiUrl,{
+      login: login,
+      friend: name
+    }).then(async (response) => {
+      if(response.status === 200) {
+        socket.emit('friendAdded', login, name)
+        let tempArray =  JSON.parse(JSON.stringify(notifications));
+        tempArray.splice(index, 1);
+        setNotifications(tempArray);
+        handleNotificationsClose();
+      }
+      else if(response.status === 422) {
+        // TODO
+      }
+      else if(response.status === 400) {
+        // TODO
+      }
+    });
+  }
+
+  const enterGame = (index: number) => {
+    let tempArray =  JSON.parse(JSON.stringify(notifications));
+    tempArray.splice(index, 1);
+    setNotifications(tempArray);
+    handleNotificationsClose();
+  }
 
   const handleNotificationsOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorNotifEl(event.currentTarget);
@@ -93,25 +137,39 @@ const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
           <MenuItem
             key={i}
           >
-            Пользователь {row.login} приглашает вас в друзья
+            Пользователь {row.from} приглашает вас в друзья
             <Button 
               variant="contained"
+              sx={{
+                ml:1
+              }}
+              onClick={addFriend.bind(this, row.from, i)}
             >
               Принять
             </Button>
-          </MenuItem>
+          </MenuItem> 
         )
-      else if(row.event === "gameInvite")
+      else if(row.event === "inviteInLobby")
         return (
           <MenuItem
             key={i}
           >
-            Пользователь {row.login} приглашает вас в игру
-            <Button 
-              variant="contained"
+            Пользователь {row.from} приглашает вас в игру
+            <Link
+              href={"http://localhost:3000/api/inviteLink/" + row.invite_id}
+              underline="none"
+              color="inherit"
             >
-              Принять
-            </Button>
+              <Button 
+                sx={{
+                  ml:1
+                }}
+                onClick={enterGame.bind(this, i)}
+                variant="contained"
+              >
+                Принять
+              </Button>
+              </Link>
           </MenuItem>
         )
     })
@@ -139,11 +197,6 @@ const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
 
   return (
     <Fragment>
-        <IconButton size="large" color="inherit">
-          <Badge badgeContent={4} color="error">
-            <Mail />
-          </Badge>
-        </IconButton>
         <IconButton
           size="large"
           color="inherit"

@@ -134,6 +134,33 @@ app.post('/api/createLobby', async (req, res) => {
   }
 });
 
+app.post('/api/closeLobby', async (req, res) => {
+  let status = 400;
+  try{
+    const lobby = await Lobbies.findOne({
+      where: {
+        invite_id: req.body.invite_id
+      }
+    });
+    if(!lobby) 
+      throw true;
+
+    await lobby.destroy();
+
+    req.session.lobby = null!;
+    req.session.player = null!;
+    status = 200;
+  }
+  catch(err) {
+    
+    status = 422;
+  }
+  finally {
+    res.status(status);
+    res.json({});
+  }
+});
+
 app.get('/api/inviteLink/:id', async (req, res) => {
   let status = 400;
   try{
@@ -196,6 +223,46 @@ app.get('/api/inviteLink/:id', async (req, res) => {
     // res.json({});
     res.redirect('http://localhost:3001/lobby?' + req.params.id);
   }
+})
+
+app.post('/api/removeFromLobby', async (req, res) => {
+  let status = 400;
+  try{
+    const player = await Players.findOne({
+      where: {
+        user_id: req.body.player_id
+      }
+    });
+    if(!player)
+      throw true;
+    
+    const hand = await Hands.findOne({
+      where: {
+        player_id: player.id
+      }
+    });
+    if(!hand) 
+      throw true;
+
+    await hand.destroy()
+    await player.destroy()
+    status = 200;
+  }
+  catch(err) {
+
+    status = 422;
+  }
+  finally {
+    res.status(status);
+    res.json({});
+  }
+})
+
+
+app.post('/api/removeLobbyData', async (req, res) => {
+  req.session.lobby = null!;
+  res.status(200);
+  res.json({});
 })
 
 app.post('/api/getUserData', async (req, res) => {
@@ -291,7 +358,6 @@ app.post('/api/getUserData', async (req, res) => {
     status = 200;
   }
   catch(err) {
-    console.log(err);
     if(err == 200)
       status = 200;
     else
@@ -354,7 +420,6 @@ app.post('/api/startGame', async (req, res) => {
     status = 200;
   }
   catch(err) {
-    console.log(err);
     status = 422;
   }
   finally {
@@ -459,7 +524,7 @@ async function fillHand(symbols: Symbols[], currentHand: Hands) {
     }
   }
   catch(err) {
-    console.log(err);
+    
   }
 }
 
@@ -510,7 +575,7 @@ app.post('/api/nextTurn', async (req, res) => {
     status = 200;
   }
   catch(err) {
-    console.log(err);
+    
     status = 422;
   }
   finally {
@@ -561,7 +626,7 @@ app.post('/api/removeSymbolInField', async (req, res) => {
     status = 200;
   }
   catch(err) {
-    console.log(err);
+    
     status = 422;
   }
   finally {
@@ -591,7 +656,7 @@ app.post('/api/insertSymbolInField', async (req, res) => {
     status = 200;
   }
   catch(err) {
-    console.log(err);
+    
     status = 422;
   }
   finally {
@@ -665,7 +730,7 @@ app.post('/api/removeSymbolInHand', async (req, res) => {
     status = 200;
   }
   catch(err) {
-    console.log(err);
+    
     status = 422;
   }
   finally {
@@ -739,7 +804,7 @@ app.post('/api/insertSymbolInHand', async (req, res) => {
     status = 200;
   }
   catch(err) {
-    console.log(err);
+    
     status = 422;
   }
   finally {
@@ -810,7 +875,7 @@ app.post('/api/signup', async (req, res) => {
     }
   }
   catch(err) {
-    console.log(err);
+    
     status = 422;
   }
   finally {
@@ -864,6 +929,7 @@ app.post('/api/addFriend', async (req, res) => {
       status = 422;
   }
   catch(err) {
+    
     status = 422;
   }
   finally {
@@ -906,6 +972,7 @@ app.post('/api/removeFriend', async (req, res) => {
       status = 422;
   }
   catch(err) {
+    
     status = 422;
   }
   finally {
@@ -947,7 +1014,7 @@ app.post('/api/findAllFriends', async (req, res) => {
       status = 422;
   }
   catch(err) {
-    console.log(err);
+    
     status = 422;
   }
   finally {
@@ -971,14 +1038,62 @@ io.on("connection", (socket) => {
     }
     console.log('get room');
   });
-  socket.on('addFriend', async (login: string) => {
+  socket.on('removeRoom', async (room: string) => {
+    if(room){
+      socket.broadcast.to(room).emit('removedFromLobby');
+      io.in(room).socketsLeave(room);
+    }
+  });
+  socket.on('leaveRoom', (room: string) => {
+    socket.leave(room);
+  })
+  socket.on('removeFromRoom', async (user_id: number) => {
     const user = await Users.findOne({
       where: {
-        login: login
+        id: user_id
       }
     })
     if(user?.socket_id)
-      socket.broadcast.to(user.socket_id).emit('sendFriendInvite', user.login);
+      socket.broadcast.to(user.socket_id).emit('removedFromLobby');
+  });
+  socket.on('addFriend', async (login: string, friendName: string) => {
+    const user = await Users.findOne({
+      where: {
+        login: friendName
+      }
+    })
+    if(user?.socket_id)
+      socket.broadcast.to(user.socket_id).emit('friendInvite', login);
+  });
+  socket.on('friendAdded', async (login: string, friendName: string) => {
+    const user = await Users.findOne({
+      where: {
+        login: friendName
+      }
+    })
+    if(user?.socket_id){
+      io.to(user.socket_id).emit('friendAdded');
+      io.to(socket.id).emit('friendAdded');
+    }
+  });
+  socket.on('removeFriend', async (login: string, friendName: string) => {
+    const user = await Users.findOne({
+      where: {
+        login: friendName
+      }
+    })
+    if(user?.socket_id)
+      socket.broadcast.to(user.socket_id).emit('removeFriend');
+  });
+  socket.on('inviteInLobby', async (friendName: string, invite_id: string) => {
+    const user = await Users.findOne({
+      where: {
+        login: friendName
+      }
+    })
+    console.log('invite')
+    if(user?.socket_id)
+      socket.broadcast.to(user.socket_id).emit('inviteInLobby', invite_id);
   });
   socket.on('login', async (login: string, socket_id: string) => {
     const user = await Users.findOne({
