@@ -36,7 +36,7 @@ interface CreateLobbyProps {
 const CreateLobby: FunctionComponent<CreateLobbyProps> = (props) => {
   const { setInviteId, getUserData } = props;
   const [maxPlayers, setMaxPlayers] = React.useState<number | null>(2);
-  const [hover, setHover] = React.useState(-1);
+  const [_, setHover] = React.useState(-1);
   const [name, setName] = React.useState<string>('');
   const [password, setPassword] = React.useState<string>('');
   const [isPrivate, setPrivate] = React.useState<boolean>(false);

@@ -11,11 +11,13 @@ interface CellTextProps {
   game: UserData['game'],
   attachSymbolMesh: Function,
   attachSymbolId: Function,
+  attachMesh: Function,
+  attachPriceMesh: Function,
   position: Vector3 | undefined,
   setGetFromSlotId: Function | null,
   setGetFromCellId: Function | null,
   cellId: number | null,
-  slotId: number | null
+  slotId: number | null,
 }
 
 const CellText: FunctionComponent<CellTextProps> = (props) => {
@@ -28,7 +30,9 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
     setGetFromSlotId,
     setGetFromCellId,
     cellId,
-    slotId
+    slotId,
+    attachMesh,
+    attachPriceMesh
   } = props;
   const { viewport } = useThree()
   const meshRef = useRef<THREE.Mesh>(null!)
@@ -63,7 +67,9 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
 
   const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
     setPointerDown(true);
-    attachSymbolMesh(e.object)
+    attachSymbolMesh(symbolMesh.current)
+    attachMesh(meshRef.current)
+    attachPriceMesh(priceMesh.current)
     attachSymbolId(symbol)
     if(setGetFromSlotId)
       setGetFromSlotId(slotId)
@@ -74,16 +80,12 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
   const handlePointerUp = (e: ThreeEvent<PointerEvent>) => {
     setPointerDown(false);
     attachSymbolMesh(null!)
+    attachMesh(null!)
+    attachPriceMesh(null!)
     attachSymbolId(null!)
   }
   
   const handlePointerMove = (e:  ThreeEvent<PointerEvent>) => {
-    e.object.position.x = e.point.x;
-    e.object.position.y = e.point.y;
-    symbolMesh.current.position.x = e.object.position.x - .17;
-    symbolMesh.current.position.y = e.object.position.y - .05;
-    priceMesh.current.position.x = e.object.position.x + .07;
-    priceMesh.current.position.y = e.object.position.y - .14;
   }
 
   useEffect(() => {
@@ -113,7 +115,7 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
         onPointerMove={isPointerDown ? handlePointerMove : () => {}}
       >
         <boxGeometry args={[1.35, 1.35, .25]} />
-        <meshStandardMaterial color={hovered || active ? '#442D70' : '#6441A4'} />
+        <meshPhongMaterial color={hovered || active ? 'black' : 'black'} opacity={.5} transparent />
       </mesh>
       <mesh
         ref={symbolMesh}

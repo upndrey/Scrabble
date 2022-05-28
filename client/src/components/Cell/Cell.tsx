@@ -84,7 +84,7 @@ const Cell: FunctionComponent<CellProps> = (props) => {
     >
       <boxGeometry args={[1.35, 1.35, .25]} />
       <meshStandardMaterial 
-        color={hovered || active ? '#442D70' : color} 
+        color={color} 
       />
     </mesh>
   )

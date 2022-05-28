@@ -32,8 +32,21 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
   } = props;
   const {login, game, lobby} = userData;
   const [attachedSymbolId, attachSymbolId] = useState<number>(null!)
+  const [attachedMesh, attachMesh] = useState<THREE.Mesh>(null!)
+  const [attachedPriceMesh, attachPriceMesh] = useState<THREE.Mesh>(null!)
   const [getFromSlotId, setGetFromSlotId] = useState<number>(null!)
   const [getFromCellId, setGetFromCellId] = useState<number>(null!)
+
+  const onMouseMove = (e: ThreeEvent<PointerEvent>) => {
+    if(attachedMesh && attachedSymbolMesh && attachedPriceMesh) {
+      attachedMesh.position.x = e.point.x;
+      attachedMesh.position.y = e.point.y;
+      attachedSymbolMesh.position.x = e.point.x - .17;
+      attachedSymbolMesh.position.y = e.point.y - .05;
+      attachedPriceMesh.position.x = e.point.x + .07;
+      attachedPriceMesh.position.y = e.point.y - .14;
+    }
+  }
 
   const renderFieldCells = () => {
     return game?.mapCells.map((row: any, i:number) => {
@@ -70,6 +83,8 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
               cellId={game?.fieldCells[i][j].id}
               slotId={null}
               attachSymbolMesh={attachSymbolMesh}
+              attachMesh={attachMesh}
+              attachPriceMesh={attachPriceMesh}
               attachSymbolId={attachSymbolId}
               setGetFromSlotId={null}
               setGetFromCellId={setGetFromCellId}
@@ -118,6 +133,8 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
             cellId={null}
             slotId={row}
             attachSymbolMesh={attachSymbolMesh}
+            attachMesh={attachMesh}
+            attachPriceMesh={attachPriceMesh}
             attachSymbolId={attachSymbolId}
             setGetFromSlotId={setGetFromSlotId}
             setGetFromCellId={null}
@@ -132,11 +149,19 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
  
   return (
     <Canvas
+      
       onCreated={({camera}) => {
       }}
     >
       <ambientLight />
       <pointLight position={[10, 10, 10]} />
+      <mesh
+        scale={1}
+        onPointerMove={onMouseMove}
+      >
+        <boxGeometry args={[100, 100, 1.9]} />
+        <meshPhongMaterial color="#fff" opacity={0} transparent />
+      </mesh>
       <mesh
         scale={.25}
         position={[-1.4, -.0, .85]}
