@@ -27,17 +27,14 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
       navigate('/game');
   });
   useEffect(() => {
-    console.log(1);
     socket.emit('room', lobby?.invite_id);
     socket.on('newUser', async (invide_id: string) => {
-      console.log('get newUser');
       await getUserData();
     })
     socket.on('startGame', async () => {
       await getUserData();
     })
     socket.on('removedFromLobby', async () => {
-      console.log('removed');
       socket.emit('leaveRoom', lobby?.invite_id);
       const apiUrl = 'http://localhost:3000/api/removeLobbyData';
       await axios.post(apiUrl)
@@ -46,7 +43,6 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
   }, []);
 
   const handleRemove = (id: number) => {
-    console.log(id);
     const apiUrl = 'http://localhost:3000/api/removeFromLobby';
     if(login)
       axios.post(apiUrl,{

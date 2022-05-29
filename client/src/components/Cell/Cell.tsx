@@ -42,9 +42,7 @@ const Cell: FunctionComponent<CellProps> = (props) => {
   const handlePointerUp = async (e: ThreeEvent<PointerEvent>) => {
     if(!attachedSymbolMesh) 
       return;
-    console.log("cell up", attachedSymbolMesh.position.x);
     if(cellId){
-      console.log(getFromSlotId, getFromCellId)
       if(getFromSlotId){
         await axios.post('http://localhost:3000/api/removeSymbolInHand', {
           slot: getFromSlotId,
@@ -61,8 +59,6 @@ const Cell: FunctionComponent<CellProps> = (props) => {
         cellId: cellId,
         symbolId: attachedSymbolId
       })
-      // setGetFromSlotId(null!);
-      // setGetFromCellId(null!);
       socket.emit('gameMove', lobby?.invite_id)
     }
     else if(slotId) {
@@ -82,10 +78,7 @@ const Cell: FunctionComponent<CellProps> = (props) => {
         slot: slotId,
         symbolId: attachedSymbolId
       })
-      // setGetFromSlotId(null!);
-      // setGetFromCellId(null!);
       socket.emit('gameMove', lobby?.invite_id)
-      // await getUserData()
     }
   } 
   const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {

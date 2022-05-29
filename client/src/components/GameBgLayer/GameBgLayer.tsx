@@ -131,7 +131,6 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
       return user?.player.login === login
     })
     const handSymbols : any = currentPlayer?.hand;
-    console.log(handSymbols)
     return [1, 2, 3, 4, 5, 6, 7].map((row: any, index) => {
       if(handSymbols && handSymbols[`slot${row}`])
         return (

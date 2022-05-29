@@ -1152,6 +1152,9 @@ io.on("connection", (socket) => {
   socket.on('startGame', (room: string) => {
     socket.broadcast.to(room).emit('startGame');
   })
+  socket.on('nextTurn', (room: string) => {
+    socket.broadcast.to(room).emit('nextTurn');
+  })
   socket.on('gameMove', (room: string | undefined) => {
     if(room)
       io.in(room).emit('gameMove');

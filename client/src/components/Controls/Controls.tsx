@@ -2,6 +2,7 @@ import { Button, Divider, List, Stack, TextField, Typography } from '@mui/materi
 import { Box } from '@mui/system'
 import axios from 'axios'
 import React, { useState } from 'react'
+import { socket } from '../../features/socket'
 import { UserData } from '../../interfaces/UserData'
 import GamePlayersList from '../GamePlayersList/GamePlayersList'
 import GamePoints from '../GamePoints/GamePoints'
@@ -41,6 +42,7 @@ const Controls = ({
     }).then(async (response) => {
       if(response.status === 200) {
         await getUserData();
+        socket.emit('nextTurn', lobby?.invite_id)
       }
       else if(response.status === 422) {
         // TODO

@@ -62,8 +62,6 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
     const correctSymbol = game?.symbols.find((row) => {
       return row.id === symbol
     })
-    if(correctSymbol?.value === 'ж' || correctSymbol?.value === 'и')
-      console.log(correctSymbol?.value, meshRef.current?.position.x);
     if(correctSymbol?.value){
       textGeo = new TextGeometry(correctSymbol?.value.toLocaleUpperCase(), textOptions);
       valueGeo = new TextGeometry(correctSymbol?.price.toString(), valueOptions);
@@ -105,11 +103,8 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
     if (meshRef === null) return;
     if (meshRef.current === null) return;
     const mesh: any = meshRef.current;
-    if(symbol === 6003 || symbol === 6008)
-      console.log(attachedSymbolId, symbol)
     if(position && attachedSymbolId !== symbol) {
       const temp : any = position;
-      // console.log(meshRef.current.position.x);
       meshRef.current.position.x = temp[0];
       meshRef.current.position.y = temp[1];
       meshRef.current.position.z = temp[2];

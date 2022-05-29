@@ -24,6 +24,9 @@ const Game: FunctionComponent<GameProps> = (props) => {
     socket.on('gameMove', async () => {
       await getUserData();
     });
+    socket.on('nextTurn', async () => {
+      await getUserData();
+    });
     socket.emit('room', lobby?.invite_id)
   }, []);
   const onControlsEnterHandler = () => {
