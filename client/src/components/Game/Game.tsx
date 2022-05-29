@@ -2,6 +2,7 @@ import { Box } from "@mui/material";
 import { Canvas, ThreeEvent } from "@react-three/fiber";
 import { FunctionComponent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { socket } from "../../features/socket";
 import { UserData } from "../../interfaces/UserData";
 import Controls from "../Controls/Controls";
 import GameBgLayer from "../GameBgLayer/GameBgLayer";
@@ -20,7 +21,11 @@ const Game: FunctionComponent<GameProps> = (props) => {
   useEffect(() => {
     if(!game)
       navigate('/'); 
-  });
+    socket.on('gameMove', async () => {
+      await getUserData();
+    });
+    socket.emit('room', lobby?.invite_id)
+  }, []);
   const onControlsEnterHandler = () => {
     if(attachedSymbolMesh)
       setControlsZIndex(0);

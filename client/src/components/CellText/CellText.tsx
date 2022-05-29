@@ -18,6 +18,8 @@ interface CellTextProps {
   setGetFromCellId: Function | null,
   cellId: number | null,
   slotId: number | null,
+  attachedSymbolMesh: THREE.Mesh,
+  attachedSymbolId: number
 }
 
 const CellText: FunctionComponent<CellTextProps> = (props) => {
@@ -32,7 +34,8 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
     cellId,
     slotId,
     attachMesh,
-    attachPriceMesh
+    attachPriceMesh,
+    attachedSymbolId
   } = props;
   const { viewport } = useThree()
   const meshRef = useRef<THREE.Mesh>(null!)
@@ -59,6 +62,8 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
     const correctSymbol = game?.symbols.find((row) => {
       return row.id === symbol
     })
+    if(correctSymbol?.value === 'ж' || correctSymbol?.value === 'и')
+      console.log(correctSymbol?.value, meshRef.current?.position.x);
     if(correctSymbol?.value){
       textGeo = new TextGeometry(correctSymbol?.value.toLocaleUpperCase(), textOptions);
       valueGeo = new TextGeometry(correctSymbol?.price.toString(), valueOptions);
@@ -78,11 +83,19 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
   }
 
   const handlePointerUp = (e: ThreeEvent<PointerEvent>) => {
-    setPointerDown(false);
-    attachSymbolMesh(null!)
-    attachMesh(null!)
-    attachPriceMesh(null!)
-    attachSymbolId(null!)
+    if(isPointerDown) {
+      setTimeout(() => {
+        attachSymbolMesh(null!)
+        attachMesh(null!)
+        attachPriceMesh(null!)
+        attachSymbolId(null!)
+        if(setGetFromSlotId)
+          setGetFromSlotId(null!)
+        if(setGetFromCellId)
+          setGetFromCellId(null!)
+        setPointerDown(false);
+      }, 1000);
+    }
   }
   
   const handlePointerMove = (e:  ThreeEvent<PointerEvent>) => {
@@ -91,9 +104,16 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
   useEffect(() => {
     if (meshRef === null) return;
     if (meshRef.current === null) return;
-
     const mesh: any = meshRef.current;
-
+    if(symbol === 6003 || symbol === 6008)
+      console.log(attachedSymbolId, symbol)
+    if(position && attachedSymbolId !== symbol) {
+      const temp : any = position;
+      // console.log(meshRef.current.position.x);
+      meshRef.current.position.x = temp[0];
+      meshRef.current.position.y = temp[1];
+      meshRef.current.position.z = temp[2];
+    }
     symbolMesh.current.position.x = mesh.position.x - .17;
     symbolMesh.current.position.y = mesh.position.y - .05;
     symbolMesh.current.position.z = mesh.position.z + .02;
@@ -112,7 +132,6 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
         }
         onPointerUp={handlePointerUp}
         onPointerDown={handlePointerDown}
-        onPointerMove={isPointerDown ? handlePointerMove : () => {}}
       >
         <boxGeometry args={[1.35, 1.35, .25]} />
         <meshPhongMaterial color={hovered || active ? 'black' : 'black'} opacity={.5} transparent />

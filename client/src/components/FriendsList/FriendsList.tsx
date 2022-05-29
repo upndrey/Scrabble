@@ -52,7 +52,6 @@ const FriendsList: FunctionComponent<FriendsListProps> = (props) => {
   }, []);
 
   const getFriendsList = () => {
-    console.log(login); 
     const apiUrl = 'http://localhost:3000/api/findAllFriends';
     if(login)
       axios.post(apiUrl,{
@@ -60,8 +59,7 @@ const FriendsList: FunctionComponent<FriendsListProps> = (props) => {
       }).then(async (response) => { 
         if(response.status === 200) {  
           const json = response.data; 
-          setFriendsList(json[0].friend);
-          console.log(json[0].friend);  
+          setFriendsList(json[0]?.friend);
         }  
         else if(response.status === 422) {
           // TODO

@@ -33,6 +33,9 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
       console.log('get newUser');
       await getUserData();
     })
+    socket.on('startGame', async () => {
+      await getUserData();
+    })
     socket.on('removedFromLobby', async () => {
       console.log('removed');
       socket.emit('leaveRoom', lobby?.invite_id);
@@ -126,6 +129,7 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
     axios.post('http://localhost:3000/api/startGame').then(async (response) => {
       if(response.status === 200) {
         await getUserData();
+        socket.emit('startGame', lobby.invite_id)
         startGame(true);
         beginStartGame(false);
       }

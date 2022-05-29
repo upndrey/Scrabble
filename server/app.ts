@@ -619,14 +619,69 @@ app.post('/api/removeSymbolInField', async (req, res) => {
     if(!fieldCell)
       throw true;
 
+        
+      let toValue = null;
+      if(req.body.toSlot) {
+        const currentPlayer = await Players.findOne({
+          where: {
+            lobby_id: req.session.lobby.id,
+            slot: findSlotByTurn(req.session.game.turn, req.session.lobby.max_players)
+          },
+        });
+
+        if(!currentPlayer)
+          throw true;
+        
+        const currentHand = await Hands.findOne({
+          where: {
+            player_id: currentPlayer.id
+          }
+        })
+  
+        if(!currentHand)
+          throw true;
+
+        switch(req.body.toSlot) {
+          case 1: 
+            toValue = currentHand.slot1;
+            break;
+          case 2: 
+            toValue = currentHand.slot2;
+            break;
+          case 3: 
+            toValue = currentHand.slot3;
+            break;
+          case 4: 
+            toValue = currentHand.slot4;
+            break;
+          case 5: 
+            toValue = currentHand.slot5;
+            break;
+          case 6: 
+            toValue = currentHand.slot6;
+            break;
+          case 7: 
+            toValue = currentHand.slot7;
+            break;
+        }
+      }
+      else if(req.body.toCell) {
+        const fieldCell = await FieldCells.findOne({
+          where: {
+            id: req.body.toCell
+          }
+        });
+        toValue = fieldCell?.symbol_id;
+      }
+
     await fieldCell?.update({
-      symbol_id: null
+      symbol_id: toValue
     });
     
     status = 200;
   }
   catch(err) {
-    
+    console.log(err);
     status = 422;
   }
   finally {
@@ -688,41 +743,76 @@ app.post('/api/removeSymbolInHand', async (req, res) => {
 
     if(!currentHand)
       throw true;
+
+    let toValue = null;
+    if(req.body.toSlot) {
+      switch(req.body.toSlot) {
+        case 1: 
+          toValue = currentHand.slot1;
+          break;
+        case 2: 
+          toValue = currentHand.slot2;
+          break;
+        case 3: 
+          toValue = currentHand.slot3;
+          break;
+        case 4: 
+          toValue = currentHand.slot4;
+          break;
+        case 5: 
+          toValue = currentHand.slot5;
+          break;
+        case 6: 
+          toValue = currentHand.slot6;
+          break;
+        case 7: 
+          toValue = currentHand.slot7;
+          break;
+      }
+    }
+    else if(req.body.toCell) {
+      const fieldCell = await FieldCells.findOne({
+        where: {
+          id: req.body.toCell
+        }
+      });
+      toValue = fieldCell?.symbol_id;
+    }
     
     switch(req.body.slot) {
       case 1: 
         await currentHand.update({
-          slot1: null
+          slot1: toValue
         });
         break;
       case 2: 
         await currentHand.update({
-          slot2: null
+          slot2: toValue
         });
         break;
       case 3: 
         await currentHand.update({
-          slot3: null
+          slot3: toValue
         });
         break;
       case 4: 
         await currentHand.update({
-          slot4: null
+          slot4: toValue
         });
         break;
       case 5: 
         await currentHand.update({
-          slot5: null
+          slot5: toValue
         });
         break;
       case 6: 
         await currentHand.update({
-          slot6: null
+          slot6: toValue
         });
         break;
       case 7: 
         await currentHand.update({
-          slot7: null
+          slot7: toValue
         });
         break;
     }
@@ -1031,6 +1121,7 @@ const io = new Server(httpServer, {
  });
 
 io.on("connection", (socket) => {
+  // Lobby
   socket.on('room', async (room: string) => {
     if(room){
       socket.join(room);
@@ -1056,6 +1147,17 @@ io.on("connection", (socket) => {
     if(user?.socket_id)
       socket.broadcast.to(user.socket_id).emit('removedFromLobby');
   });
+
+  // Game
+  socket.on('startGame', (room: string) => {
+    socket.broadcast.to(room).emit('startGame');
+  })
+  socket.on('gameMove', (room: string | undefined) => {
+    if(room)
+      io.in(room).emit('gameMove');
+  })
+
+  // Friends
   socket.on('addFriend', async (login: string, friendName: string) => {
     const user = await Users.findOne({
       where: {
@@ -1095,6 +1197,8 @@ io.on("connection", (socket) => {
     if(user?.socket_id)
       socket.broadcast.to(user.socket_id).emit('inviteInLobby', invite_id);
   });
+
+  // Login
   socket.on('login', async (login: string, socket_id: string) => {
     const user = await Users.findOne({
       where: {

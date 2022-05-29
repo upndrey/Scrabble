@@ -34,6 +34,7 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
   const [attachedSymbolId, attachSymbolId] = useState<number>(null!)
   const [attachedMesh, attachMesh] = useState<THREE.Mesh>(null!)
   const [attachedPriceMesh, attachPriceMesh] = useState<THREE.Mesh>(null!)
+  const [mouseMoveAllowed, setMouseMoveAllowed] = useState<boolean>(false)
   const [getFromSlotId, setGetFromSlotId] = useState<number>(null!)
   const [getFromCellId, setGetFromCellId] = useState<number>(null!)
 
@@ -63,7 +64,10 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
             slotId={null}
             getFromCellId={getFromCellId}
             getFromSlotId={getFromSlotId}
+            setGetFromSlotId={setGetFromSlotId}
+            setGetFromCellId={setGetFromCellId}
             getUserData={getUserData}
+            lobby={userData['lobby']}
           />
         )
       })
@@ -82,12 +86,14 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
               game={game}
               cellId={game?.fieldCells[i][j].id}
               slotId={null}
+              attachedSymbolMesh={attachedSymbolMesh}
               attachSymbolMesh={attachSymbolMesh}
               attachMesh={attachMesh}
               attachPriceMesh={attachPriceMesh}
               attachSymbolId={attachSymbolId}
               setGetFromSlotId={null}
               setGetFromCellId={setGetFromCellId}
+              attachedSymbolId={attachedSymbolId}
             />
           )
         else {
@@ -111,7 +117,10 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
           slotId={row}
           getFromCellId={getFromCellId}
           getFromSlotId={getFromSlotId}
+          setGetFromSlotId={setGetFromSlotId}
+          setGetFromCellId={setGetFromCellId}
           getUserData={getUserData}
+          lobby={userData['lobby']}
         />
       )
     });
@@ -122,6 +131,7 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
       return user?.player.login === login
     })
     const handSymbols : any = currentPlayer?.hand;
+    console.log(handSymbols)
     return [1, 2, 3, 4, 5, 6, 7].map((row: any, index) => {
       if(handSymbols && handSymbols[`slot${row}`])
         return (
@@ -132,12 +142,14 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
             game={game}
             cellId={null}
             slotId={row}
+            attachedSymbolMesh={attachedSymbolMesh}
             attachSymbolMesh={attachSymbolMesh}
             attachMesh={attachMesh}
             attachPriceMesh={attachPriceMesh}
             attachSymbolId={attachSymbolId}
             setGetFromSlotId={setGetFromSlotId}
             setGetFromCellId={null}
+            attachedSymbolId={attachedSymbolId}
           />
         )
       else {
@@ -157,7 +169,9 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
       <pointLight position={[10, 10, 10]} />
       <mesh
         scale={1}
-        onPointerMove={onMouseMove}
+        onPointerMove={mouseMoveAllowed ? onMouseMove : () => {}}
+        onPointerDown={() => {setMouseMoveAllowed(true)}}
+        onPointerUp={() => {setMouseMoveAllowed(false)}}
       >
         <boxGeometry args={[100, 100, 1.9]} />
         <meshPhongMaterial color="#fff" opacity={0} transparent />
