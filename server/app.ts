@@ -1,6 +1,7 @@
 import express from "express";
 import { createServer } from "http";
 import { Server, Socket } from "socket.io";
+import { Op } from "sequelize";
 import * as http from 'http';
 import cors from 'cors';
 import { associate } from "./db/associations";
@@ -22,6 +23,7 @@ import { createClient } from "redis";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import Friends from "./models/Friends";
 const connectRedis = require('connect-redis');
+
 
 // Encrypt options
 const saltRounds = 10;
@@ -299,7 +301,7 @@ app.post('/api/getUserData', async (req, res) => {
       throw 422;
     req.session.lobby = lobbyBd;
     const players = await Players.findAll({
-      attributes: ['user_id','points', 'is_host', 'slot'],
+      attributes: ['user_id','points', 'is_host', 'slot', 'is_ended'],
       where: {
         lobby_id: lobbyBd.id
       },
@@ -538,11 +540,17 @@ app.post('/api/nextTurn', async (req, res) => {
     })
     if(!game)
       throw true;
+      
+    const allPlayers = await Players.findAll({
+      where: {
+        lobby_id: req.session.lobby.id,
+      },
+    });
 
     const currentPlayer = await Players.findOne({
       where: {
         lobby_id: req.session.lobby.id,
-        slot: findSlotByTurn(game.turn, req.session.lobby.max_players)
+        slot: findSlotByTurn(game.turn, allPlayers.length)
       },
     });
     if(!currentPlayer)
@@ -575,7 +583,7 @@ app.post('/api/nextTurn', async (req, res) => {
     status = 200;
   }
   catch(err) {
-    
+    console.log(err);
     status = 422;
   }
   finally {
@@ -584,25 +592,98 @@ app.post('/api/nextTurn', async (req, res) => {
   }
 });
 
-app.post('/api/exitGame', async (req, res) => {
-  const player = await Players.findOne({
-    where: {
-      lobby_id: req.session.lobby.id,
-      user_id: req.body.user_id
-    },
-  });
-  if(!player)
-    throw true;;
+app.post('/api/noMoreWays', async (req, res) => {
+  let status = 400;
+  try {
+    const player = await Players.findOne({
+      where: {
+        lobby_id: req.session.lobby.id,
+        user_id: req.body.user_id
+      },
+    });
+    if(!player)
+      throw true;
+    
+    await player.update({
+      is_ended: true
+    });
 
-  const currentHand = await Hands.findOne({
-    where: {
-      player_id: player.id
+    const playersWithTurns = await Players.findAll({
+      where: {
+        lobby_id: req.session.lobby.id,
+        is_ended: false
+      }
+    });
+    if(playersWithTurns.length === 0) {
+      io.to(req.session.lobby.invite_id).emit('gameEnded');
     }
-  })
-  if(!currentHand)
-    throw true;
-  await currentHand.destroy();
-  await player.destroy();
+    status = 200;
+  }
+  catch(err) {
+    status = 422;
+  }
+  finally {
+    res.status(status);
+    res.json({});
+  }
+
+
+});
+
+app.post('/api/exitGame', async (req, res) => {
+  let status = 400;
+  try {
+    const player = await Players.findOne({
+      where: {
+        lobby_id: req.session.lobby.id,
+        user_id: req.body.user_id
+      },
+    });
+    if(!player)
+      throw true;
+
+    const playerSlot = player.slot;
+  
+    const currentHand = await Hands.findOne({
+      where: {
+        player_id: player.id
+      }
+    })
+    if(!currentHand)
+      throw true;
+    await currentHand.destroy();
+    await player.destroy();
+
+    const allPlayers = await Players.findAll({
+      where: {
+        lobby_id: req.session.lobby.id,
+        slot: {
+          [Op.gt]: playerSlot
+        }
+      },
+    });
+
+    allPlayers.forEach(async (row) => {
+      await row.update({
+        slot: row.slot - 1
+      })
+    });
+
+    if(req.session.lobby)
+      req.session.lobby = null!;
+    if(req.session.game)
+      req.session.game = null!;
+
+    status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    status = 422;
+  }
+  finally {
+    res.status(status);
+    res.json({});
+  }
 });
 
 app.post('/api/removeSymbolInField', async (req, res) => {
@@ -903,6 +984,95 @@ app.post('/api/insertSymbolInHand', async (req, res) => {
   }
 });
 
+app.post('/api/insertSymbolInSet', async (req, res) => {
+  let status = 400;
+  try {
+    if(!req.session.game)
+      throw true;
+    
+    const symbol = await Symbols.findOne({
+      where: {
+        id: req.body.symbolId
+      }
+    });
+
+    if(!symbol)
+      throw true;
+
+    const fieldCell = await FieldCells.findOne({
+      where: {
+        symbol_id: req.body.symbolId
+      }
+    });
+
+    if(fieldCell) {
+      await fieldCell.update({
+        symbol_id: null
+      })
+    }
+    else {
+      const currentHand = await Hands.findOne({
+        where: {
+          [Op.or]: [
+            {slot1: req.body.symbolId},
+            {slot2: req.body.symbolId},
+            {slot3: req.body.symbolId},
+            {slot4: req.body.symbolId},
+            {slot5: req.body.symbolId},
+            {slot6: req.body.symbolId},
+            {slot7: req.body.symbolId}
+          ]
+        }
+      });
+  
+      if(currentHand) {
+        if(currentHand.slot1 === req.body.symbolId)
+          await currentHand.update({
+            slot1: null
+          })
+        else if(currentHand.slot2 === req.body.symbolId)
+          await currentHand.update({
+            slot2: null
+          })
+        else if(currentHand.slot3 === req.body.symbolId)
+          await currentHand.update({
+            slot3: null
+          })
+        else if(currentHand.slot4 === req.body.symbolId)
+          await currentHand.update({
+            slot4: null
+          })
+        else if(currentHand.slot5 === req.body.symbolId)
+          await currentHand.update({
+            slot5: null
+          })
+        else if(currentHand.slot6 === req.body.symbolId)
+          await currentHand.update({
+            slot6: null
+          })
+        else if(currentHand.slot7 === req.body.symbolId)
+          await currentHand.update({
+            slot7: null
+          })
+      }
+    }
+    
+    symbol.update({
+      in_box: true
+    })
+    
+    status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    status = 422;
+  }
+  finally {
+    res.status(status);
+    res.json({});
+  }
+});
+
 app.post('/api/login', async (req, res) => {
   let status = 400;
   try {
@@ -1114,11 +1284,13 @@ app.post('/api/findAllFriends', async (req, res) => {
 });
 
 const httpServer = createServer(app);
+
+// socket options
 const io = new Server(httpServer, { 
-    cors: {
-        origin: "http://localhost:3001"
-    }
- });
+  cors: {
+      origin: "http://localhost:3001"
+  }
+});
 
 io.on("connection", (socket) => {
   // Lobby

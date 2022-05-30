@@ -2,6 +2,7 @@ import { Button, Divider, List, Stack, TextField, Typography } from '@mui/materi
 import { Box } from '@mui/system'
 import axios from 'axios'
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { socket } from '../../features/socket'
 import { UserData } from '../../interfaces/UserData'
 import GamePlayersList from '../GamePlayersList/GamePlayersList'
@@ -17,7 +18,8 @@ type Props = {
   lobby: UserData['lobby'],
   game: UserData['game'],
   isYourTurn: boolean,
-  currentPlayerName: string | undefined,
+  currentPlayer: any,
+  yourPlayer: any,
   getUserData: Function
 }
 
@@ -31,10 +33,12 @@ const Controls = ({
     lobby,
     game,
     isYourTurn,
-    currentPlayerName,
+    currentPlayer,
+    yourPlayer,
     getUserData
   }: Props) => {
   const [points, setPoints] = useState<number>(0);
+  const navigate = useNavigate();
 
   const nextTurnHandler = async () => {
     await axios.post('http://localhost:3000/api/nextTurn', {
@@ -43,6 +47,42 @@ const Controls = ({
       if(response.status === 200) {
         await getUserData();
         socket.emit('nextTurn', lobby?.invite_id)
+      }
+      else if(response.status === 422) {
+        // TODO
+      }
+      else if(response.status === 400) {
+        // TODO
+      }
+    });
+  }
+
+  const exitGameHandler = async () => {
+    await nextTurnHandler();
+    await axios.post('http://localhost:3000/api/exitGame', {
+      user_id: yourPlayer?.user_id
+    }).then(async (response) => {
+      if(response.status === 200) {
+        socket.emit('gameMove', lobby?.invite_id)
+        await getUserData();
+        socket.emit('leaveRoom');
+        navigate('/'); 
+      }
+      else if(response.status === 422) {
+        // TODO
+      }
+      else if(response.status === 400) {
+        // TODO
+      }
+    });
+  }
+  
+  const noMoreWaysHandler = async () => {
+    await axios.post('http://localhost:3000/api/noMoreWays', {
+      user_id: currentPlayer?.user_id
+    }).then(async (response) => {
+      if(response.status === 200) {
+        nextTurnHandler()
       }
       else if(response.status === 422) {
         // TODO
@@ -72,7 +112,7 @@ const Controls = ({
         lobby={lobby}
         turn={game?.gameInfo.turn}
         isYourTurn={isYourTurn}
-        currentPlayerName={currentPlayerName}
+        currentPlayerName={currentPlayer?.player.login}
       />
       <Divider sx={{
         color: 'primary.contrastText',
@@ -103,7 +143,7 @@ const Controls = ({
             width: '100%',
             mt: 1
           }}
-          onClick={() => {}}
+          onClick={() => {noMoreWaysHandler()}}
         >
           Кончились ходы
         </Button> :
@@ -115,7 +155,7 @@ const Controls = ({
           width: '100%',
           mt: 1
         }}
-        onClick={() => {}}
+        onClick={() => {exitGameHandler()}}
       >
         Выйти из игры
       </Button>

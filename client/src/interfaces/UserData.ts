@@ -8,6 +8,7 @@ export interface UserData {
       is_host: boolean,
       points: number | null,
       slot: number,
+      is_ended: boolean,
       player: {
         id: number,
         login: string,

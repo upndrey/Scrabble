@@ -8,6 +8,7 @@ class Players extends Model {
   declare is_host: boolean;
   declare points: number;
   declare slot: number;
+  declare is_ended: boolean;
 }
 
 Players.init({
@@ -36,6 +37,11 @@ Players.init({
   slot: {
     type: DataTypes.INTEGER,
     allowNull: false
+  },
+  is_ended: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
   }
 }, {
   sequelize,

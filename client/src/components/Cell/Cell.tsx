@@ -40,7 +40,7 @@ const Cell: FunctionComponent<CellProps> = (props) => {
   const [hovered, setHover] = useState(false)
   const [active, setActive] = useState(false)
   const handlePointerUp = async (e: ThreeEvent<PointerEvent>) => {
-    if(!attachedSymbolMesh) 
+    if(!attachedSymbolId) 
       return;
     if(cellId){
       if(getFromSlotId){
@@ -82,8 +82,6 @@ const Cell: FunctionComponent<CellProps> = (props) => {
     }
   } 
   const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
-    if(!attachedSymbolMesh) 
-      return;
   }
 
   return (

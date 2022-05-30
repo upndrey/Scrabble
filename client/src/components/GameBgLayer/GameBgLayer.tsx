@@ -187,13 +187,6 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
 
       <mesh
         scale={.25}
-        position={[3.1, -1.25, .91]}
-      >
-        <boxGeometry args={[11.2, 3.7, .5]} />
-        <meshStandardMaterial color='#9260F0' />
-      </mesh>
-      <mesh
-        scale={.25}
         position={[3.1, 1.12, .91]}
         onPointerEnter={(e) => {onControlsEnterHandler()}}
         onPointerOut={(e) => {onControlsOutHandler()}}
@@ -202,7 +195,10 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
         <meshStandardMaterial color={'#9260F0'} />
       </mesh>
       
-      <GameBox></GameBox>
+      <GameBox
+        attachedSymbolId={attachedSymbolId}
+        lobby={lobby}
+      ></GameBox>
 
       <mesh
         scale={.25}
