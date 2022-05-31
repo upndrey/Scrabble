@@ -59,9 +59,11 @@ app.set('trust proxy', 1)
 app.use(express.urlencoded());
 app.use(express.json());
 
+const origin = true ? 'https://upndrey.github.io' : 'http://localhost:3001'
+
 var corsOptions = {
+  origin: origin,
   credentials: true, 
-  origin: true,
   exposedHeaders: ['set-cookie']
 };
 app.use(cors(corsOptions));
@@ -91,7 +93,8 @@ app.use(
     secret: '123456', 
     cookie:{
       maxAge: 1000 * 60 * 60,
-      secure: false,
+      secure: true,
+      sameSite: 'none'
     },
     saveUninitialized: true
   })
@@ -1292,13 +1295,12 @@ app.post('/api/findAllFriends', async (req, res) => {
   }
 });
 
-var httpServer = http.createServer(app);
 var httpsServer = https.createServer(credentials, app);
 
 // socket options
-const io = new Server(httpServer, { 
+const io = new Server(httpsServer, { 
   cors: {
-      origin: CLIENT_ADDR
+      origin: origin
   }
 });
 
@@ -1397,5 +1399,4 @@ io.on("connection", (socket) => {
   });
 });
 
-httpServer.listen(3000);
 httpsServer.listen(8443);

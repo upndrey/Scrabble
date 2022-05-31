@@ -45,7 +45,7 @@ const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
   }, [])
 
   const addFriend = (name: string, index: number) => {
-    const apiUrl = SERVER_IP + '/addFriend';
+    const apiUrl = SERVER_IP + '/api/addFriend';
     console.log(login);
     axios.post(apiUrl,{
       login: login,

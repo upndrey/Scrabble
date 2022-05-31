@@ -46,7 +46,7 @@ const CreateLobby: FunctionComponent<CreateLobbyProps> = (props) => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const apiUrl = SERVER_IP + '/createLobby';
+    const apiUrl = SERVER_IP + '/api/createLobby';
     console.log(maxPlayers);
     axios.post(apiUrl,{
       name: name,

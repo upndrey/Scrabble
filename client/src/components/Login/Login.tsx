@@ -27,13 +27,16 @@ const Login: FunctionComponent<LoginProps> = (props) => {
     e.preventDefault();
 
 
-    const apiUrl = SERVER_IP + '/login';
+    const apiUrl = SERVER_IP + '/api/login';
     axios.post(apiUrl, {
       login: login,
       password: password
     }).then((response) => {
+      console.log('1');
       if(response.status === 200) {
+        console.log('2');
         if(login !== "") {
+          console.log('login', login);
           socket.emit('login', login, socket.id)
         }
         getUserData();

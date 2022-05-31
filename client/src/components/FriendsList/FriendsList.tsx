@@ -53,7 +53,7 @@ const FriendsList: FunctionComponent<FriendsListProps> = (props) => {
   }, []);
 
   const getFriendsList = () => {
-    const apiUrl = SERVER_IP + '/findAllFriends';
+    const apiUrl = SERVER_IP + '/api/findAllFriends';
     if(login)
       axios.post(apiUrl,{
         login: login
@@ -72,7 +72,7 @@ const FriendsList: FunctionComponent<FriendsListProps> = (props) => {
   }
 
   const handleSubmit = () => {
-    const apiUrl = SERVER_IP + '/addFriend';
+    const apiUrl = SERVER_IP + '/api/addFriend';
     axios.post(apiUrl,{
       login: login,
       friend: name
@@ -91,7 +91,7 @@ const FriendsList: FunctionComponent<FriendsListProps> = (props) => {
   }
 
   const handleRemove = (friendName: string) => {
-    const apiUrl = SERVER_IP + '/removeFriend';
+    const apiUrl = SERVER_IP + '/api/removeFriend';
     axios.post(apiUrl,{
       login: login,
       friend: friendName

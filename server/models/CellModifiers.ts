@@ -15,7 +15,7 @@ class CellModifiers extends Model {
       defaults: {
         name: 'default',
         value: 1,
-        color: 'green'
+        color: '#1E5945'
       }
     });
   
@@ -31,7 +31,7 @@ class CellModifiers extends Model {
       defaults: {
         name: 'cell',
         value: 2,
-        color: 'lightblue'
+        color: '#42AAFF'
       }
     });
   
@@ -47,7 +47,7 @@ class CellModifiers extends Model {
       defaults: {
         name: 'cell',
         value: 3,
-        color: 'pink'
+        color: '#EB5284'
       }
     });
   

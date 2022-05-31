@@ -45,18 +45,18 @@ const Cell: FunctionComponent<CellProps> = (props) => {
       return;
     if(cellId){
       if(getFromSlotId){
-        await axios.post(SERVER_IP + '/removeSymbolInHand', {
+        await axios.post(SERVER_IP + '/api/removeSymbolInHand', {
           slot: getFromSlotId,
           toCell: cellId
         })
       }
       else {
-        await axios.post(SERVER_IP + '/removeSymbolInField', {
+        await axios.post(SERVER_IP + '/api/removeSymbolInField', {
           cellId: getFromCellId,
           toCell: cellId
         })
       }
-      await axios.post(SERVER_IP + '/insertSymbolInField', {
+      await axios.post(SERVER_IP + '/api/insertSymbolInField', {
         cellId: cellId,
         symbolId: attachedSymbolId
       })
@@ -64,18 +64,18 @@ const Cell: FunctionComponent<CellProps> = (props) => {
     }
     else if(slotId) {
       if(getFromSlotId) {
-        await axios.post(SERVER_IP + '/removeSymbolInHand', {
+        await axios.post(SERVER_IP + '/api/removeSymbolInHand', {
           slot: getFromSlotId,
           toSlot: slotId
         });
       }
       else {
-        await axios.post(SERVER_IP + '/removeSymbolInField', {
+        await axios.post(SERVER_IP + '/api/removeSymbolInField', {
           cellId: getFromCellId,
           toSlot: slotId
         })
       }
-      await axios.post(SERVER_IP + '/insertSymbolInHand', {
+      await axios.post(SERVER_IP + '/api/insertSymbolInHand', {
         slot: slotId,
         symbolId: attachedSymbolId
       })
