@@ -6,6 +6,7 @@ import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
 import { socket } from '../../features/socket';
 import roboto from '../../fonts/roboto.json'
 import { UserData } from '../../interfaces/UserData';
+import { SERVER_IP } from '../../features/server';
 const font = new FontLoader().parse(roboto);
 
 type Props = {
@@ -26,7 +27,7 @@ const GameBox = ({attachedSymbolId, lobby}: Props) => {
     console.log(2);
     if(attachedSymbolId) {
       console.log(3);
-      await axios.post('http://localhost:3000/api/insertSymbolInSet', {
+      await axios.post(SERVER_IP + '/insertSymbolInSet', {
         symbolId: attachedSymbolId
       })
       socket.emit('gameMove', lobby?.invite_id)

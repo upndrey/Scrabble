@@ -2,6 +2,7 @@ import { Button, Modal, Paper, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { FormEvent, FunctionComponent, useRef, useState } from "react";
 import axios from 'axios';
+import { SERVER_IP } from '../../features/server';
 axios.defaults.withCredentials = true;
 
 interface SignupProps {
@@ -18,7 +19,7 @@ const Signup: FunctionComponent<SignupProps> = (props) => {
   
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const apiUrl = 'http://localhost:3000/api/signup';
+    const apiUrl = SERVER_IP + '/signup';
     axios.post(apiUrl, {
       login: login,
       password: password

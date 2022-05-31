@@ -7,6 +7,7 @@ import styled from "styled-components";
 import axios from 'axios';
 import { io } from "socket.io-client";
 import {socket} from '../../features/socket';
+import { SERVER_IP } from '../../features/server';
 axios.defaults.withCredentials = true;
 
 interface LoginProps {
@@ -26,7 +27,7 @@ const Login: FunctionComponent<LoginProps> = (props) => {
     e.preventDefault();
 
 
-    const apiUrl = 'http://localhost:3000/api/login';
+    const apiUrl = SERVER_IP + '/login';
     axios.post(apiUrl, {
       login: login,
       password: password

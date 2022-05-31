@@ -7,6 +7,7 @@ import { socket } from '../../features/socket'
 import { UserData } from '../../interfaces/UserData'
 import GamePlayersList from '../GamePlayersList/GamePlayersList'
 import GamePoints from '../GamePoints/GamePoints'
+import { SERVER_IP } from '../../features/server';
 
 type Props = {
   width: string,
@@ -41,7 +42,7 @@ const Controls = ({
   const navigate = useNavigate();
 
   const nextTurnHandler = async () => {
-    await axios.post('http://localhost:3000/api/nextTurn', {
+    await axios.post(SERVER_IP + '/nextTurn', {
       points: points
     }).then(async (response) => {
       if(response.status === 200) {
@@ -59,7 +60,7 @@ const Controls = ({
 
   const exitGameHandler = async () => {
     await nextTurnHandler();
-    await axios.post('http://localhost:3000/api/exitGame', {
+    await axios.post(SERVER_IP + '/exitGame', {
       user_id: yourPlayer?.user_id
     }).then(async (response) => {
       if(response.status === 200) {
@@ -78,7 +79,7 @@ const Controls = ({
   }
   
   const noMoreWaysHandler = async () => {
-    await axios.post('http://localhost:3000/api/noMoreWays', {
+    await axios.post(SERVER_IP + '/noMoreWays', {
       user_id: currentPlayer?.user_id
     }).then(async (response) => {
       if(response.status === 200) {

@@ -7,6 +7,7 @@ import { socket } from "../../features/socket";
 import { UserData } from "../../interfaces/UserData";
 import Controls from "../Controls/Controls";
 import GameBgLayer from "../GameBgLayer/GameBgLayer";
+import { SERVER_IP } from '../../features/server';
 
 interface GameProps {
   userData: UserData,
@@ -88,7 +89,7 @@ const Game: FunctionComponent<GameProps> = (props) => {
     console.log(currentPlayer);
     const didGameEnded = lobby?.players.every((player) => {return player?.is_ended})
     if(currentPlayer?.is_ended && !didGameEnded) {
-      axios.post('http://localhost:3000/api/nextTurn', {
+      axios.post(SERVER_IP + '/nextTurn', {
         points: 0
       }).then(async (response) => {
         if(response.status === 200) {
@@ -109,7 +110,7 @@ const Game: FunctionComponent<GameProps> = (props) => {
 
   const closeGameHandler = async () => {
     const yourPlayer = findYourPlayer();
-    await axios.post('http://localhost:3000/api/exitGame', {
+    await axios.post(SERVER_IP + '/exitGame', {
       user_id: yourPlayer?.user_id
     }).then(async (response) => {
       if(response.status === 200) {

@@ -6,6 +6,7 @@ import { Dispatch, Fragment, FunctionComponent, SetStateAction, useEffect, useSt
 import { useNavigate } from "react-router-dom";
 import { socket } from "../../features/socket";
 import { Link } from '@mui/material';
+import { SERVER_IP } from '../../features/server';
 
 interface UserMenuProps {
   login: string
@@ -44,7 +45,7 @@ const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
   }, [])
 
   const addFriend = (name: string, index: number) => {
-    const apiUrl = 'http://localhost:3000/api/addFriend';
+    const apiUrl = SERVER_IP + '/addFriend';
     console.log(login);
     axios.post(apiUrl,{
       login: login,
@@ -116,7 +117,7 @@ const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
             textDecoration: 'none',
             color: 'inherit'
           }}
-          href="http://localhost:3000/api/logout"
+          href={SERVER_IP+ "/api/logout"}
         >
             Выход
         </a>
@@ -156,7 +157,7 @@ const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
           >
             Пользователь {row.from} приглашает вас в игру
             <Link
-              href={"http://localhost:3000/api/inviteLink/" + row.invite_id}
+              href={SERVER_IP + "/api/inviteLink/" + row.invite_id}
               underline="none"
               color="inherit"
             >

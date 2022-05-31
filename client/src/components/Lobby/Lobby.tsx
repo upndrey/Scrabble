@@ -8,6 +8,7 @@ import { LoadingButton } from '@mui/lab';
 import { io } from "socket.io-client";
 import {socket} from '../../features/socket';
 import CloseIcon from '@mui/icons-material/Close';
+import { SERVER_IP } from '../../features/server';
 
 interface LobbyProps {
   login: string
@@ -36,14 +37,14 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
     })
     socket.on('removedFromLobby', async () => {
       socket.emit('leaveRoom', lobby?.invite_id);
-      const apiUrl = 'http://localhost:3000/api/removeLobbyData';
+      const apiUrl = SERVER_IP + '/removeLobbyData';
       await axios.post(apiUrl)
       await getUserData();
     })
   }, []);
 
   const handleRemove = (id: number) => {
-    const apiUrl = 'http://localhost:3000/api/removeFromLobby';
+    const apiUrl = SERVER_IP + '/removeFromLobby';
     if(login)
       axios.post(apiUrl,{
         player_id: id
@@ -62,7 +63,7 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
   }
 
   const handleCloseLobby = () => {
-    const apiUrl = 'http://localhost:3000/api/closeLobby';
+    const apiUrl = SERVER_IP + '/closeLobby';
     if(login && lobby)
       axios.post(apiUrl,{
         invite_id: lobby.invite_id
@@ -122,7 +123,7 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
 
   const startGameHandler = () => {
     beginStartGame(true)
-    axios.post('http://localhost:3000/api/startGame').then(async (response) => {
+    axios.post(SERVER_IP + '/startGame').then(async (response) => {
       if(response.status === 200) {
         await getUserData();
         socket.emit('startGame', lobby.invite_id)

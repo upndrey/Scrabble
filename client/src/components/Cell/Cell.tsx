@@ -3,6 +3,7 @@ import axios from "axios";
 import React, { useEffect, useRef, FunctionComponent, useState } from "react";
 import { socket } from "../../features/socket";
 import { UserData } from "../../interfaces/UserData";
+import { SERVER_IP } from '../../features/server';
 
 interface CellProps {
   attachedSymbolMesh: THREE.Mesh,
@@ -44,18 +45,18 @@ const Cell: FunctionComponent<CellProps> = (props) => {
       return;
     if(cellId){
       if(getFromSlotId){
-        await axios.post('http://localhost:3000/api/removeSymbolInHand', {
+        await axios.post(SERVER_IP + '/removeSymbolInHand', {
           slot: getFromSlotId,
           toCell: cellId
         })
       }
       else {
-        await axios.post('http://localhost:3000/api/removeSymbolInField', {
+        await axios.post(SERVER_IP + '/removeSymbolInField', {
           cellId: getFromCellId,
           toCell: cellId
         })
       }
-      await axios.post('http://localhost:3000/api/insertSymbolInField', {
+      await axios.post(SERVER_IP + '/insertSymbolInField', {
         cellId: cellId,
         symbolId: attachedSymbolId
       })
@@ -63,18 +64,18 @@ const Cell: FunctionComponent<CellProps> = (props) => {
     }
     else if(slotId) {
       if(getFromSlotId) {
-        await axios.post('http://localhost:3000/api/removeSymbolInHand', {
+        await axios.post(SERVER_IP + '/removeSymbolInHand', {
           slot: getFromSlotId,
           toSlot: slotId
         });
       }
       else {
-        await axios.post('http://localhost:3000/api/removeSymbolInField', {
+        await axios.post(SERVER_IP + '/removeSymbolInField', {
           cellId: getFromCellId,
           toSlot: slotId
         })
       }
-      await axios.post('http://localhost:3000/api/insertSymbolInHand', {
+      await axios.post(SERVER_IP + '/insertSymbolInHand', {
         slot: slotId,
         symbolId: attachedSymbolId
       })

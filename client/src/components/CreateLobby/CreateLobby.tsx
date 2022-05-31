@@ -6,6 +6,7 @@ import React, { FormEvent, FunctionComponent, useRef } from "react";
 import styled from "styled-components";
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios';
+import { SERVER_IP } from '../../features/server';
 axios.defaults.withCredentials = true;
 
 const CssTextField = styled(TextField)({
@@ -45,7 +46,7 @@ const CreateLobby: FunctionComponent<CreateLobbyProps> = (props) => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const apiUrl = 'http://localhost:3000/api/createLobby';
+    const apiUrl = SERVER_IP + '/createLobby';
     console.log(maxPlayers);
     axios.post(apiUrl,{
       name: name,

@@ -13,6 +13,7 @@ import axios from 'axios';
 import { UserData } from '../../interfaces/UserData';
 import { devData } from '../../features/devData';
 import {socket} from '../../features/socket';
+import { SERVER_IP } from '../../features/server';
 axios.defaults.withCredentials = true;
 
 
@@ -32,7 +33,7 @@ function App() {
     // setLogin(devData.login);
     // setLobby(devData.lobby);
     // setGame(devData.game); 
-    await axios.post('http://localhost:3000/api/getUserData').then((response) => {
+    await axios.post(SERVER_IP + '/getUserData').then((response) => {
       if(response.status === 200) {
         const json : UserData = response.data;
         console.log(json);

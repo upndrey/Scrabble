@@ -3,6 +3,8 @@ import { createServer } from "http";
 import { Server, Socket } from "socket.io";
 import { Op } from "sequelize";
 import * as http from 'http';
+import * as https from 'https';
+import * as fs from 'fs';
 import cors from 'cors';
 import { associate } from "./db/associations";
 import { init } from "./db/init";
@@ -24,6 +26,13 @@ import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import Friends from "./models/Friends";
 const connectRedis = require('connect-redis');
 
+var privateKey  = fs.readFileSync('sslcert/private.key', 'utf8');
+var certificate = fs.readFileSync('sslcert/certificate.crt', 'utf8');
+
+var credentials = {key: privateKey, cert: certificate};
+
+const SERVER_IP = true ? 'https://80.78.244.11' : 'http://localhost';
+const CLIENT_ADDR = true ? 'https://upndrey.github.io/Scrabble' : 'http://localhost:3001';
 
 // Encrypt options
 const saltRounds = 10;
@@ -223,7 +232,7 @@ app.get('/api/inviteLink/:id', async (req, res) => {
   finally {
     res.status(status);
     // res.json({});
-    res.redirect('http://localhost:3001/lobby?' + req.params.id);
+    res.redirect(CLIENT_ADDR + '/lobby?' + req.params.id);
   }
 })
 
@@ -1107,7 +1116,7 @@ app.get('/api/logout', async (req, res) => {
   let status = 200;
   store.destroy(req.sessionID, function () {
     req.session.destroy(() => {
-      res.redirect('http://localhost:3001')
+      res.redirect(CLIENT_ADDR)
     });
   });
 });
@@ -1283,12 +1292,13 @@ app.post('/api/findAllFriends', async (req, res) => {
   }
 });
 
-const httpServer = createServer(app);
+var httpServer = http.createServer(app);
+var httpsServer = https.createServer(credentials, app);
 
 // socket options
 const io = new Server(httpServer, { 
   cors: {
-      origin: "http://localhost:3001"
+      origin: CLIENT_ADDR
   }
 });
 
@@ -1388,3 +1398,4 @@ io.on("connection", (socket) => {
 });
 
 httpServer.listen(3000);
+httpsServer.listen(8443);

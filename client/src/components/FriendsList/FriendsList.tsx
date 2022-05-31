@@ -7,6 +7,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { Notifications } from "@mui/icons-material";
 import {socket} from '../../features/socket';
 import { UserData } from "../../interfaces/UserData";
+import { SERVER_IP } from '../../features/server';
 
 interface FriendsListProps {
   isFriendsOpen: boolean,
@@ -52,7 +53,7 @@ const FriendsList: FunctionComponent<FriendsListProps> = (props) => {
   }, []);
 
   const getFriendsList = () => {
-    const apiUrl = 'http://localhost:3000/api/findAllFriends';
+    const apiUrl = SERVER_IP + '/findAllFriends';
     if(login)
       axios.post(apiUrl,{
         login: login
@@ -71,7 +72,7 @@ const FriendsList: FunctionComponent<FriendsListProps> = (props) => {
   }
 
   const handleSubmit = () => {
-    const apiUrl = 'http://localhost:3000/api/addFriend';
+    const apiUrl = SERVER_IP + '/addFriend';
     axios.post(apiUrl,{
       login: login,
       friend: name
@@ -90,7 +91,7 @@ const FriendsList: FunctionComponent<FriendsListProps> = (props) => {
   }
 
   const handleRemove = (friendName: string) => {
-    const apiUrl = 'http://localhost:3000/api/removeFriend';
+    const apiUrl = SERVER_IP + '/removeFriend';
     axios.post(apiUrl,{
       login: login,
       friend: friendName
