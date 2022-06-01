@@ -50,7 +50,7 @@ declare module 'express-session' {
 
 // Db setup
 associate();
-// init();
+init();
 // Maps.generateMap();
 
 // Express setup
