@@ -209,7 +209,7 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
             onClick={
               () => {
                 setCopySuccess(true);
-                navigator.clipboard.writeText(`http://localhost:3000/api/inviteLink/${lobby.invite_id}`)
+                navigator.clipboard.writeText(`${SERVER_IP}/api/inviteLink/${lobby.invite_id}`)
               }
             }
           >

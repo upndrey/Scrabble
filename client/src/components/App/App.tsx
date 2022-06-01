@@ -14,12 +14,14 @@ import { UserData } from '../../interfaces/UserData';
 import { devData } from '../../features/devData';
 import {socket} from '../../features/socket';
 import { SERVER_IP } from '../../features/server';
+import Rules from '../Rules/Rules';
 axios.defaults.withCredentials = true;
 
 
 
 function App() {
   const [isFriendsOpen, openFriends] = React.useState<boolean>(false);
+  const [isRulesOpen, openRules] = React.useState<boolean>(false);
   const [isLoginOpened, setLoginOpen] = React.useState<boolean>(false);
   const [isSignupOpened, setSignupOpen] = React.useState<boolean>(false);
   const [login, setLogin] = React.useState<string>("");
@@ -66,6 +68,8 @@ function App() {
       <Menu 
         setLoginOpen={setLoginOpen}
         openFriends={openFriends}
+        openRules={openRules}
+        isRulesOpen={isRulesOpen}
         isFriendsOpen={isFriendsOpen}
         setSignupOpen={setSignupOpen}
         login={login}
@@ -92,6 +96,9 @@ function App() {
         ></FriendsList> : 
         ""
       }
+      <Rules 
+      isRulesOpen={isRulesOpen}
+      />
       <Routes>
         <Route 
           path='/createLobby' 

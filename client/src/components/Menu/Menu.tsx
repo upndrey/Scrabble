@@ -19,6 +19,8 @@ const ActiveButton = styled(Button)(
 interface MenuProps {
   isFriendsOpen: boolean,
   openFriends: Function,
+  openRules: Function,
+  isRulesOpen: boolean,
   setLoginOpen: Function,
   setSignupOpen: Function,
   setLogin: Function,
@@ -37,6 +39,8 @@ const Menu: React.FunctionComponent<MenuProps> = (props) => {
     login,
     hasLobby,
     hasGame,
+    openRules,
+    isRulesOpen
   } = props;
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
@@ -53,6 +57,11 @@ const Menu: React.FunctionComponent<MenuProps> = (props) => {
   const handleFriendsOpen = () => {
     openFriends(!isFriendsOpen);
   }
+
+  const handleRulesOpen = () => {
+    openRules(!isRulesOpen);
+  }
+
 
   const renderLoginMenu = () => {
     if(login !== "") {
@@ -98,6 +107,34 @@ const Menu: React.FunctionComponent<MenuProps> = (props) => {
           }}
         >
           Друзья
+        </Button>
+      )
+  }
+
+  
+  const rulesButton = () => {
+    if(isRulesOpen) 
+      return (
+        <ActiveButton 
+          color="inherit"
+          onClick={handleRulesOpen}
+          sx={{
+            mr:1
+          }}
+        >
+          Правила
+        </ActiveButton>
+      )
+    else 
+      return (
+        <Button 
+          color="inherit"
+          onClick={handleRulesOpen}
+          sx={{
+            mr:1
+          }}
+        >
+          Правила
         </Button>
       )
   }
@@ -181,14 +218,7 @@ const Menu: React.FunctionComponent<MenuProps> = (props) => {
             }}
           >
             {friendsButton()}
-            <Button 
-              color="inherit"
-              sx={{
-                mr:1
-              }}
-            >
-              Правила
-            </Button>
+            {rulesButton()}
             {lobbyButton()}
           </Box>
           {renderLoginMenu()}

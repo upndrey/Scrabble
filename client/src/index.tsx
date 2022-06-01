@@ -15,7 +15,7 @@ const root = createRoot(container);
 root.render(
   <ThemeProvider theme={theme}>
     <Provider store={store}>
-      <BrowserRouter>
+      <BrowserRouter basename="/Scrabble">
         <App />
       </BrowserRouter>
     </Provider>

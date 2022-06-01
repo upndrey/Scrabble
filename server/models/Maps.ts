@@ -72,10 +72,10 @@ class Maps extends Model {
                 correctModifier = cellX2Modifier;
                 break;
               case 2:
-                correctModifier = cellX3Modifier;
+                correctModifier = wordX2Modifier;
                 break;
               case 3:
-                correctModifier = wordX2Modifier;
+                correctModifier = cellX3Modifier;
                 break;
               case 4:
                 correctModifier = wordX3Modifier;
