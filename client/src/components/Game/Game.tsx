@@ -218,6 +218,7 @@ const Game: FunctionComponent<GameProps> = (props) => {
           attachedSymbolMesh={attachedSymbolMesh}
           attachSymbolMesh={attachSymbolMesh}
           getUserData={getUserData}
+          isYourTurn={isYourTurn()}
         />
       </Box> 
     </>

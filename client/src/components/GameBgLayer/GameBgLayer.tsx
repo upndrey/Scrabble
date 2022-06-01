@@ -18,7 +18,8 @@ interface GameBgLayerProps {
   onControlsOutHandler: Function,
   attachedSymbolMesh: THREE.Mesh,
   attachSymbolMesh: Function,
-  getUserData: Function
+  getUserData: Function,
+  isYourTurn: boolean
 }
 
 const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
@@ -28,7 +29,8 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
     onControlsOutHandler,
     attachedSymbolMesh,
     attachSymbolMesh,
-    getUserData
+    getUserData,
+    isYourTurn
   } = props;
   const {login, game, lobby} = userData;
   const [attachedSymbolId, attachSymbolId] = useState<number>(null!)
@@ -94,6 +96,7 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
               setGetFromSlotId={null}
               setGetFromCellId={setGetFromCellId}
               attachedSymbolId={attachedSymbolId}
+              isYourTurn={isYourTurn}
             />
           )
         else {
@@ -149,6 +152,7 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
             setGetFromSlotId={setGetFromSlotId}
             setGetFromCellId={null}
             attachedSymbolId={attachedSymbolId}
+            isYourTurn={isYourTurn}
           />
         )
       else {

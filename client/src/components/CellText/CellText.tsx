@@ -19,7 +19,8 @@ interface CellTextProps {
   cellId: number | null,
   slotId: number | null,
   attachedSymbolMesh: THREE.Mesh,
-  attachedSymbolId: number
+  attachedSymbolId: number,
+  isYourTurn: boolean
 }
 
 const CellText: FunctionComponent<CellTextProps> = (props) => {
@@ -35,7 +36,8 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
     slotId,
     attachMesh,
     attachPriceMesh,
-    attachedSymbolId
+    attachedSymbolId,
+    isYourTurn
   } = props;
   const { viewport } = useThree()
   const meshRef = useRef<THREE.Mesh>(null!)
@@ -69,15 +71,17 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
   }
 
   const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
-    setPointerDown(true);
-    attachSymbolMesh(symbolMesh.current)
-    attachMesh(meshRef.current)
-    attachPriceMesh(priceMesh.current)
-    attachSymbolId(symbol)
-    if(setGetFromSlotId)
-      setGetFromSlotId(slotId)
-    if(setGetFromCellId)
-      setGetFromCellId(cellId)
+    if(isYourTurn) {
+      setPointerDown(true);
+      attachSymbolMesh(symbolMesh.current)
+      attachMesh(meshRef.current)
+      attachPriceMesh(priceMesh.current)
+      attachSymbolId(symbol)
+      if(setGetFromSlotId)
+        setGetFromSlotId(slotId)
+      if(setGetFromCellId)
+        setGetFromCellId(cellId)
+    }
   }
 
   const handlePointerUp = (e: ThreeEvent<PointerEvent>) => {
