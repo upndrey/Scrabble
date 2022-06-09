@@ -27,7 +27,7 @@ const GameBox = ({attachedSymbolId, lobby}: Props) => {
     console.log(2);
     if(attachedSymbolId) {
       console.log(3);
-      await axios.post(SERVER_IP + '/api/insertSymbolInSet', {
+      await axios.post(SERVER_IP + '/api/game/insertSymbolInSet', {
         symbolId: attachedSymbolId
       })
       socket.emit('gameMove', lobby?.invite_id)

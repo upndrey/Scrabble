@@ -20,7 +20,9 @@ interface CellTextProps {
   slotId: number | null,
   attachedSymbolMesh: THREE.Mesh,
   attachedSymbolId: number,
-  isYourTurn: boolean
+  isYourTurn: boolean,
+  isCellSeted: boolean,
+  setCell: Function
 }
 
 const CellText: FunctionComponent<CellTextProps> = (props) => {
@@ -37,7 +39,9 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
     attachMesh,
     attachPriceMesh,
     attachedSymbolId,
-    isYourTurn
+    isYourTurn,
+    isCellSeted,
+    setCell
   } = props;
   const { viewport } = useThree()
   const meshRef = useRef<THREE.Mesh>(null!)
@@ -86,17 +90,16 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
 
   const handlePointerUp = (e: ThreeEvent<PointerEvent>) => {
     if(isPointerDown) {
-      setTimeout(() => {
-        attachSymbolMesh(null!)
-        attachMesh(null!)
-        attachPriceMesh(null!)
-        attachSymbolId(null!)
-        if(setGetFromSlotId)
-          setGetFromSlotId(null!)
-        if(setGetFromCellId)
-          setGetFromCellId(null!)
-        setPointerDown(false);
-      }, 1000);
+      attachSymbolMesh(null!)
+      attachMesh(null!)
+      attachPriceMesh(null!)
+      attachSymbolId(null!)
+      if(setGetFromSlotId)
+        setGetFromSlotId(null!)
+      if(setGetFromCellId)
+        setGetFromCellId(null!)
+      setPointerDown(false);
+      setCell(false);
     }
   }
   
@@ -107,7 +110,7 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
     if (meshRef === null) return;
     if (meshRef.current === null) return;
     const mesh: any = meshRef.current;
-    if(position && attachedSymbolId !== symbol) {
+    if(position && attachedSymbolId !== symbol && isCellSeted) {
       const temp : any = position;
       meshRef.current.position.x = temp[0];
       meshRef.current.position.y = temp[1];

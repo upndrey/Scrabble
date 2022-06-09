@@ -42,7 +42,7 @@ const Controls = ({
   const navigate = useNavigate();
 
   const nextTurnHandler = async () => {
-    await axios.post(SERVER_IP + '/api/nextTurn', {
+    await axios.post(SERVER_IP + '/api/game/nextTurn', {
       points: points
     }).then(async (response) => {
       if(response.status === 200) {
@@ -60,7 +60,7 @@ const Controls = ({
 
   const exitGameHandler = async () => {
     await nextTurnHandler();
-    await axios.post(SERVER_IP + '/api/exitGame', {
+    await axios.post(SERVER_IP + '/api/game/exitGame', {
       user_id: yourPlayer?.user_id
     }).then(async (response) => {
       if(response.status === 200) {
@@ -79,7 +79,7 @@ const Controls = ({
   }
   
   const noMoreWaysHandler = async () => {
-    await axios.post(SERVER_IP + '/api/noMoreWays', {
+    await axios.post(SERVER_IP + '/api/game/noMoreWays', {
       user_id: currentPlayer?.user_id
     }).then(async (response) => {
       if(response.status === 200) {

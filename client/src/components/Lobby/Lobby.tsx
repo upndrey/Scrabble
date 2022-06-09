@@ -37,14 +37,14 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
     })
     socket.on('removedFromLobby', async () => {
       socket.emit('leaveRoom', lobby?.invite_id);
-      const apiUrl = SERVER_IP + '/api/removeLobbyData';
+      const apiUrl = SERVER_IP + '/api/lobby/removeLobbyData';
       await axios.post(apiUrl)
       await getUserData();
     })
   }, []);
 
   const handleRemove = (id: number) => {
-    const apiUrl = SERVER_IP + '/api/removeFromLobby';
+    const apiUrl = SERVER_IP + '/api/lobby/removeFromLobby';
     if(login)
       axios.post(apiUrl,{
         player_id: id
@@ -63,7 +63,7 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
   }
 
   const handleCloseLobby = () => {
-    const apiUrl = SERVER_IP + '/api/closeLobby';
+    const apiUrl = SERVER_IP + '/api/lobby/closeLobby';
     if(login && lobby)
       axios.post(apiUrl,{
         invite_id: lobby.invite_id
@@ -123,7 +123,7 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
 
   const startGameHandler = () => {
     beginStartGame(true)
-    axios.post(SERVER_IP + '/api/startGame').then(async (response) => {
+    axios.post(SERVER_IP + '/api/game/startGame').then(async (response) => {
       if(response.status === 200) {
         await getUserData();
         socket.emit('startGame', lobby.invite_id)
@@ -209,7 +209,7 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
             onClick={
               () => {
                 setCopySuccess(true);
-                navigator.clipboard.writeText(`${SERVER_IP}/api/inviteLink/${lobby.invite_id}`)
+                navigator.clipboard.writeText(`${SERVER_IP}/api/lobby/inviteLink/${lobby.invite_id}`)
               }
             }
           >

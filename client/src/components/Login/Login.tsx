@@ -27,11 +27,11 @@ const Login: FunctionComponent<LoginProps> = (props) => {
     e.preventDefault();
 
 
-    const apiUrl = SERVER_IP + '/api/login';
+    const apiUrl = SERVER_IP + '/api/user/login';
     axios.post(apiUrl, {
       login: login,
       password: password
-    }).then((response) => {
+    }, {withCredentials: true}).then((response) => {
       console.log('1');
       if(response.status === 200) {
         console.log('2');
@@ -41,7 +41,7 @@ const Login: FunctionComponent<LoginProps> = (props) => {
         }
         getUserData();
         handleLoginClose();
-        
+
       }
       else if(response.status === 422) {
         // TODO

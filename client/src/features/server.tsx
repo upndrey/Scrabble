@@ -1,1 +1,1 @@
-export const SERVER_IP = 'https://194.58.120.212:8443';
+export const SERVER_IP = 'http://localhost:3001';

@@ -6,7 +6,7 @@ import { UserData } from "../../interfaces/UserData";
 import { SERVER_IP } from '../../features/server';
 
 interface CellProps {
-  attachedSymbolMesh: THREE.Mesh,
+  attachedMesh: THREE.Mesh,
   attachedSymbolId: number,
   positionX: number,
   positionY: number,
@@ -18,13 +18,14 @@ interface CellProps {
   getUserData: Function,
   lobby: UserData['lobby'],
   setGetFromSlotId: Function,
-  setGetFromCellId: Function
+  setGetFromCellId: Function,
+  setCell: Function
 }
 
 const Cell: FunctionComponent<CellProps> = (props) => {
   const {
     color, 
-    attachedSymbolMesh, 
+    attachedMesh, 
     attachedSymbolId, 
     positionX, 
     positionY, 
@@ -35,7 +36,8 @@ const Cell: FunctionComponent<CellProps> = (props) => {
     getUserData,
     lobby,
     setGetFromSlotId,
-    setGetFromCellId
+    setGetFromCellId,
+    setCell
   } = props;
   const meshRef = useRef<THREE.Mesh>(null!)
   const [hovered, setHover] = useState(false)
@@ -43,42 +45,48 @@ const Cell: FunctionComponent<CellProps> = (props) => {
   const handlePointerUp = async (e: ThreeEvent<PointerEvent>) => {
     if(!attachedSymbolId) 
       return;
+    attachedMesh.position.x = e.object.position.x;
+    attachedMesh.position.y = e.object.position.y;
     if(cellId){
       if(getFromSlotId){
-        await axios.post(SERVER_IP + '/api/removeSymbolInHand', {
+        await axios.post(SERVER_IP + '/api/game/removeSymbolInHand', {
           slot: getFromSlotId,
           toCell: cellId
         })
       }
       else {
-        await axios.post(SERVER_IP + '/api/removeSymbolInField', {
+        await axios.post(SERVER_IP + '/api/game/removeSymbolInField', {
           cellId: getFromCellId,
           toCell: cellId
         })
       }
-      await axios.post(SERVER_IP + '/api/insertSymbolInField', {
+      await axios.post(SERVER_IP + '/api/game/insertSymbolInField', {
         cellId: cellId,
         symbolId: attachedSymbolId
       })
+      await getUserData();
+      setCell(true);
       socket.emit('gameMove', lobby?.invite_id)
     }
     else if(slotId) {
       if(getFromSlotId) {
-        await axios.post(SERVER_IP + '/api/removeSymbolInHand', {
+        await axios.post(SERVER_IP + '/api/game/removeSymbolInHand', {
           slot: getFromSlotId,
           toSlot: slotId
         });
       }
       else {
-        await axios.post(SERVER_IP + '/api/removeSymbolInField', {
+        await axios.post(SERVER_IP + '/api/game/removeSymbolInField', {
           cellId: getFromCellId,
           toSlot: slotId
         })
       }
-      await axios.post(SERVER_IP + '/api/insertSymbolInHand', {
+      await axios.post(SERVER_IP + '/api/game/insertSymbolInHand', {
         slot: slotId,
         symbolId: attachedSymbolId
       })
+      await getUserData();
+      setCell(true);
       socket.emit('gameMove', lobby?.invite_id)
     }
   } 

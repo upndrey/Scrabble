@@ -86,7 +86,6 @@ const Game: FunctionComponent<GameProps> = (props) => {
   }
   const isYourTurn = () => {
     const currentPlayer = findCurrentPlayer();
-    console.log(currentPlayer);
     const didGameEnded = lobby?.players.every((player) => {return player?.is_ended})
     if(currentPlayer?.is_ended && !didGameEnded) {
       axios.post(SERVER_IP + '/api/nextTurn', {
@@ -110,7 +109,7 @@ const Game: FunctionComponent<GameProps> = (props) => {
 
   const closeGameHandler = async () => {
     const yourPlayer = findYourPlayer();
-    await axios.post(SERVER_IP + '/api/exitGame', {
+    await axios.post(SERVER_IP + '/api/game/exitGame', {
       user_id: yourPlayer?.user_id
     }).then(async (response) => {
       if(response.status === 200) {

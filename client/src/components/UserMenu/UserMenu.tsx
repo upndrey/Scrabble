@@ -45,7 +45,7 @@ const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
   }, [])
 
   const addFriend = (name: string, index: number) => {
-    const apiUrl = SERVER_IP + '/api/addFriend';
+    const apiUrl = SERVER_IP + '/api/friends/addFriend';
     console.log(login);
     axios.post(apiUrl,{
       login: login,
@@ -117,7 +117,7 @@ const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
             textDecoration: 'none',
             color: 'inherit'
           }}
-          href={SERVER_IP+ "/api/logout"}
+          href={SERVER_IP+ "/api/user/logout"}
         >
             Выход
         </a>
@@ -157,7 +157,7 @@ const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
           >
             Пользователь {row.from} приглашает вас в игру
             <Link
-              href={SERVER_IP + "/api/inviteLink/" + row.invite_id}
+              href={SERVER_IP + "/api/lobby/inviteLink/" + row.invite_id}
               underline="none"
               color="inherit"
             >

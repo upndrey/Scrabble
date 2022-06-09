@@ -19,7 +19,7 @@ const Signup: FunctionComponent<SignupProps> = (props) => {
   
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const apiUrl = SERVER_IP + '/api/signup';
+    const apiUrl = SERVER_IP + '/api/user/signup';
     axios.post(apiUrl, {
       login: login,
       password: password

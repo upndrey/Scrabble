@@ -37,6 +37,7 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
   const [attachedMesh, attachMesh] = useState<THREE.Mesh>(null!)
   const [attachedPriceMesh, attachPriceMesh] = useState<THREE.Mesh>(null!)
   const [mouseMoveAllowed, setMouseMoveAllowed] = useState<boolean>(false)
+  const [isCellSeted, setCell] = useState<boolean>(false)
   const [getFromSlotId, setGetFromSlotId] = useState<number>(null!)
   const [getFromCellId, setGetFromCellId] = useState<number>(null!)
 
@@ -59,7 +60,7 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
             key={`${cellData.cell.row}${cellData.cell.col}`}
             positionX={-4.6 + cellData.cell.row / 2.5}
             positionY={-3.20 + cellData.cell.col / 2.5}
-            attachedSymbolMesh={attachedSymbolMesh}
+            attachedMesh={attachedMesh}
             attachedSymbolId={attachedSymbolId}
             color={cellData.modifier.color}
             cellId={game?.fieldCells[i][j].id}
@@ -70,6 +71,7 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
             setGetFromCellId={setGetFromCellId}
             getUserData={getUserData}
             lobby={userData['lobby']}
+            setCell={setCell}
           />
         )
       })
@@ -97,6 +99,8 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
               setGetFromCellId={setGetFromCellId}
               attachedSymbolId={attachedSymbolId}
               isYourTurn={isYourTurn}
+              setCell={setCell}
+              isCellSeted={isCellSeted}
             />
           )
         else {
@@ -113,7 +117,7 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
           key={index}
           positionX={1.9 + index / 2.5}
           positionY={-2}
-          attachedSymbolMesh={attachedSymbolMesh}
+          attachedMesh={attachedMesh}
           attachedSymbolId={attachedSymbolId}
           color='#442D70'
           cellId={null}
@@ -124,6 +128,7 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
           setGetFromCellId={setGetFromCellId}
           getUserData={getUserData}
           lobby={userData['lobby']}
+          setCell={setCell}
         />
       )
     });
@@ -153,6 +158,8 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
             setGetFromCellId={null}
             attachedSymbolId={attachedSymbolId}
             isYourTurn={isYourTurn}
+            setCell={setCell}
+            isCellSeted={isCellSeted}
           />
         )
       else {

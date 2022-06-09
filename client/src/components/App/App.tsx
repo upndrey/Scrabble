@@ -31,14 +31,14 @@ function App() {
 
   const getUserData = async () => {
     // devCode
-    console.log(devData);
+    // console.log(devData);
     // setLogin(devData.login);
     // setLobby(devData.lobby);
     // setGame(devData.game); 
     // if(devData.login !== login) {
     //   socket.emit('login', devData.login, socket.id)
     // }
-    await axios.post(SERVER_IP + '/api/getUserData', {withCredentials: true}).then((response) => {
+    await axios.post(SERVER_IP + '/api/user/getUserData', {withCredentials: true}).then((response) => {
       if(response.status === 200) {
         const json : UserData = response.data;
         console.log(json);
