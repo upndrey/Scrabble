@@ -47,7 +47,6 @@ const CreateLobby: FunctionComponent<CreateLobbyProps> = (props) => {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const apiUrl = SERVER_IP + '/api/lobby/createLobby';
-    console.log(maxPlayers);
     axios.post(apiUrl,{
       name: name,
       password: password,
@@ -56,15 +55,8 @@ const CreateLobby: FunctionComponent<CreateLobbyProps> = (props) => {
     }).then(async (response) => {
       if(response.status === 200) {
         const json = response.data;
-        console.log(response.status, json);
         setInviteId(json.invite_id);
         await getUserData();
-      }
-      else if(response.status === 422) {
-        // TODO
-      }
-      else if(response.status === 400) {
-        // TODO
       }
     });
     navigate("/lobby");

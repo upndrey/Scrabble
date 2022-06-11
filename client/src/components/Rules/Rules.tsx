@@ -9,7 +9,6 @@ type Props = {
 
 const Rules = ({isRulesOpen}: Props) => {
   useEffect(() => {
-    console.log(isRulesOpen);
   })
   
   return ( 

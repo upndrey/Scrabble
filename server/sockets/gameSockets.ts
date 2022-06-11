@@ -11,7 +11,7 @@ export const gameSockets = (socket: Socket<DefaultEventsMap, DefaultEventsMap, D
   })
   socket.on('gameMove', (room: string | undefined) => {
     if(room)
-      io.in(room).emit('gameMove');
+      socket.broadcast.to(room).emit('gameMove');
   })
 
 }

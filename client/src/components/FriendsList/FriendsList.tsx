@@ -62,12 +62,6 @@ const FriendsList: FunctionComponent<FriendsListProps> = (props) => {
           const json = response.data; 
           setFriendsList(json[0]?.friend);
         }  
-        else if(response.status === 422) {
-          // TODO
-        }
-        else if(response.status === 400) {
-          // TODO
-        }
       });
   }
 
@@ -81,12 +75,6 @@ const FriendsList: FunctionComponent<FriendsListProps> = (props) => {
         getFriendsList();
         socket.emit('addFriend', login, name);
       }
-      else if(response.status === 422) {
-        // TODO
-      }
-      else if(response.status === 400) {
-        // TODO
-      }
     });
   }
 
@@ -99,12 +87,6 @@ const FriendsList: FunctionComponent<FriendsListProps> = (props) => {
       if(response.status === 200) {
         socket.emit('removeFriend', login, friendName);
         getFriendsList();
-      }
-      else if(response.status === 422) {
-        // TODO
-      }
-      else if(response.status === 400) {
-        // TODO
       }
     });
   }

@@ -703,3 +703,28 @@ export const insertSymbolInSet = async (req: express.Request, res: express.Respo
     res.json({});
   }
 }
+
+export const getBoard = async (req: express.Request, res: express.Response) => {
+  let status = 500;
+  let result = null;
+  try {
+    if(!req.session.game)
+      throw true;
+
+    const {field, fieldCells} = await Fields.generateField(req.session.game.id);
+    if(!field)
+      throw true;
+    
+    result = fieldCells;
+    
+    status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    status = 500;
+  }
+  finally {
+    res.status(status);
+    res.json(result);
+  }
+}

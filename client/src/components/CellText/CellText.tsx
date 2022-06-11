@@ -49,7 +49,6 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
   const priceMesh = useRef<THREE.Mesh>(null!)
   const [hovered, setHover] = useState(false)
   const [active, setActive] = useState(true)
-  const [isPointerDown, setPointerDown] = useState<boolean>(false)
   const font = new FontLoader().parse(roboto);
 
   const textOptions = {
@@ -76,7 +75,6 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
 
   const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
     if(isYourTurn) {
-      setPointerDown(true);
       attachSymbolMesh(symbolMesh.current)
       attachMesh(meshRef.current)
       attachPriceMesh(priceMesh.current)
@@ -89,33 +87,17 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
   }
 
   const handlePointerUp = (e: ThreeEvent<PointerEvent>) => {
-    if(isPointerDown) {
-      attachSymbolMesh(null!)
-      attachMesh(null!)
-      attachPriceMesh(null!)
-      attachSymbolId(null!)
-      if(setGetFromSlotId)
-        setGetFromSlotId(null!)
-      if(setGetFromCellId)
-        setGetFromCellId(null!)
-      setPointerDown(false);
-      setCell(false);
-    }
   }
   
-  const handlePointerMove = (e:  ThreeEvent<PointerEvent>) => {
-  }
-
   useEffect(() => {
     if (meshRef === null) return;
     if (meshRef.current === null) return;
     const mesh: any = meshRef.current;
-    if(position && attachedSymbolId !== symbol && isCellSeted) {
-      const temp : any = position;
-      meshRef.current.position.x = temp[0];
-      meshRef.current.position.y = temp[1];
-      meshRef.current.position.z = temp[2];
-    }
+    const temp : any = position;
+    meshRef.current.position.x = temp[0];
+    meshRef.current.position.y = temp[1];
+    meshRef.current.position.z = temp[2];
+
     symbolMesh.current.position.x = mesh.position.x - .17;
     symbolMesh.current.position.y = mesh.position.y - .05;
     symbolMesh.current.position.z = mesh.position.z + .02;
@@ -123,6 +105,10 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
     priceMesh.current.position.x = mesh.position.x + .07;
     priceMesh.current.position.y = mesh.position.y - .14;
     priceMesh.current.position.z = mesh.position.z + .02;
+  }, [])
+
+  useEffect(() => {
+    
   });
   return (
     <>

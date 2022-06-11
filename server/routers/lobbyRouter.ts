@@ -5,7 +5,7 @@ export const lobbyRouter = express.Router();
 
 lobbyRouter.post('/createLobby', lobbyController.createLobby);
 lobbyRouter.post('/closeLobby', lobbyController.closeLobby);
-lobbyRouter.post('/inviteLink/:id', lobbyController.getInvite);
+lobbyRouter.get('/inviteLink/:id', lobbyController.getInvite);
 lobbyRouter.post('/removeFromLobby', lobbyController.removeFromLobby);
 lobbyRouter.post('/removeLobbyData', lobbyController.removeLobbyData);
 

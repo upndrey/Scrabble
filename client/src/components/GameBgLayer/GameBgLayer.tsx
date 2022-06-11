@@ -1,7 +1,7 @@
 import { Canvas, ThreeEvent, useFrame } from "@react-three/fiber";
 import React, { useEffect, useRef, FunctionComponent, useState } from "react";
 import * as THREE from "three";
-import { UserData } from "../../interfaces/UserData";
+import { FieldCell, Player, UserData } from "../../interfaces/UserData";
 import Symbol from '../Symbol/Symbol'
 import CellText from '../CellText/CellText'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
@@ -19,7 +19,12 @@ interface GameBgLayerProps {
   attachedSymbolMesh: THREE.Mesh,
   attachSymbolMesh: Function,
   getUserData: Function,
-  isYourTurn: boolean
+  isYourTurn: boolean,
+  fieldCells: FieldCell[][] | undefined,
+  setFieldCells: Function,
+  currentPlayer: Player | null | undefined,
+  yourPlayer: Player | null | undefined,
+  setCurrentPlayer: Function
 }
 
 const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
@@ -30,7 +35,12 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
     attachedSymbolMesh,
     attachSymbolMesh,
     getUserData,
-    isYourTurn
+    isYourTurn,
+    fieldCells,
+    setFieldCells,
+    currentPlayer,
+    yourPlayer,
+    setCurrentPlayer
   } = props;
   const {login, game, lobby} = userData;
   const [attachedSymbolId, attachSymbolId] = useState<number>(null!)
@@ -40,6 +50,111 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
   const [isCellSeted, setCell] = useState<boolean>(false)
   const [getFromSlotId, setGetFromSlotId] = useState<number>(null!)
   const [getFromCellId, setGetFromCellId] = useState<number>(null!)
+
+  useEffect(() => {
+    if(isCellSeted) {
+      attachSymbolMesh(null!)
+      attachMesh(null!)
+      attachPriceMesh(null!)
+      attachSymbolId(null!)
+      if(setGetFromSlotId)
+        setGetFromSlotId(null!)
+      if(setGetFromCellId)
+        setGetFromCellId(null!)
+      // setPointerDown(false);
+      setCell(false);
+    }
+  })
+
+  const editFieldCells = (
+    fromField_id: number | null, 
+    toField_id: number | null, 
+    fromSlot_id: number | null,
+    toSlot_id: number | null
+  ) => {
+    let from = {
+      row: -1,
+      col: -1,
+      slot: -1
+    }
+    let to = {
+      row: -1,
+      col: -1,
+      slot: -1
+    }
+    if(!fieldCells || !currentPlayer)
+      return;
+    if(fromField_id || toField_id)
+      for(let i = 0; i < fieldCells.length; i++) {
+        for(let j = 0; j < fieldCells[0].length; j++) {
+          if(fieldCells[i][j].id === fromField_id) {
+            from = {
+              row: i,
+              col: j,
+              slot: -1
+            }
+          }
+          else if(fieldCells[i][j].id === toField_id) {
+            to = {
+              row: i,
+              col: j,
+              slot: -1
+            }
+          }
+        }
+      }
+
+    if(fromSlot_id) {
+      from = {
+        row: -1,
+        col: -1,
+        slot: fromSlot_id
+      }
+    }
+    if(toSlot_id)
+      to = {
+        row: -1,
+        col: -1,
+        slot: toSlot_id
+      }
+    
+      
+
+    const tempFieldCells : FieldCell[][] = JSON.parse(JSON.stringify(fieldCells));
+    const tempPlayer : Player = JSON.parse(JSON.stringify(currentPlayer));
+    console.log(from, to);
+    if(from.row !== -1) {
+      const savedCell: FieldCell = JSON.parse(JSON.stringify(tempFieldCells[from.row][from.col]));
+      if(to.row !== -1) {
+        tempFieldCells[from.row][from.col].symbol_id = tempFieldCells[to.row][to.col].symbol_id;
+        tempFieldCells[to.row][to.col].symbol_id = savedCell.symbol_id;
+      }
+      else if(to.slot !== -1) {
+        tempFieldCells[from.row][from.col].symbol_id = tempPlayer.hand['slot' + to.slot as keyof Player['hand']];
+        tempPlayer.hand['slot' + to.slot as keyof Player['hand']] = savedCell.symbol_id;
+      }
+      else {
+        tempFieldCells[from.row][from.col].symbol_id = null;
+      }
+    }
+    else if(from.slot !== -1) {
+      const savedSlot: number = JSON.parse(JSON.stringify(tempPlayer.hand['slot' + from.slot as keyof Player['hand']]));
+      if(to.row !== -1) {
+        tempPlayer.hand['slot' + from.slot as keyof Player['hand']] = tempFieldCells[to.row][to.col].symbol_id;
+        tempFieldCells[to.row][to.col].symbol_id = savedSlot;
+      }
+      else if(to.slot !== -1) {
+        tempPlayer.hand['slot' + from.slot as keyof Player['hand']] = tempPlayer.hand['slot' + to.slot as keyof Player['hand']];
+        tempPlayer.hand['slot' + to.slot as keyof Player['hand']] = savedSlot;
+      }
+      else {
+        tempPlayer.hand['slot' + from.slot as keyof Player['hand']] = null;
+      }
+    }
+    console.log("temp", tempPlayer.hand);
+    setFieldCells(tempFieldCells);
+    setCurrentPlayer(tempPlayer);
+  }
 
   const onMouseMove = (e: ThreeEvent<PointerEvent>) => {
     if(attachedMesh && attachedSymbolMesh && attachedPriceMesh) {
@@ -55,25 +170,29 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
   const renderFieldCells = () => {
     return game?.mapCells.map((row: any, i:number) => {
       return row.map((cellData: any, j:number) => {
-        return (
-          <Cell
-            key={`${cellData.cell.row}${cellData.cell.col}`}
-            positionX={-4.6 + cellData.cell.row / 2.5}
-            positionY={-3.20 + cellData.cell.col / 2.5}
-            attachedMesh={attachedMesh}
-            attachedSymbolId={attachedSymbolId}
-            color={cellData.modifier.color}
-            cellId={game?.fieldCells[i][j].id}
-            slotId={null}
-            getFromCellId={getFromCellId}
-            getFromSlotId={getFromSlotId}
-            setGetFromSlotId={setGetFromSlotId}
-            setGetFromCellId={setGetFromCellId}
-            getUserData={getUserData}
-            lobby={userData['lobby']}
-            setCell={setCell}
-          />
-        )
+        if(fieldCells)
+          return (
+            <Cell
+              key={`${cellData.cell.row}${cellData.cell.col}`}
+              editFieldCells={editFieldCells}
+              positionX={-4.6 + cellData.cell.row / 2.5}
+              positionY={-3.20 + cellData.cell.col / 2.5}
+              attachedMesh={attachedMesh}
+              attachedSymbolMesh={attachedSymbolMesh}
+              attachedPriceMesh={attachedPriceMesh}
+              attachedSymbolId={attachedSymbolId}
+              color={cellData.modifier.color}
+              cellId={fieldCells[i][j].id}
+              slotId={null}
+              getFromCellId={getFromCellId}
+              getFromSlotId={getFromSlotId}
+              setGetFromCellId={setGetFromCellId}
+              setGetFromSlotId={setGetFromSlotId}
+              getUserData={getUserData}
+              lobby={userData['lobby']}
+              setCell={setCell}
+            />
+          )
       })
     });
   }
@@ -81,14 +200,14 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
   const renderFieldSymbols = () => {
     return game?.mapCells.map((row: any, i: number) => {
       return row.map((cellData: any, j: number) => {
-        if(game?.fieldCells[i][j].symbol_id)
+        if(fieldCells && fieldCells[i][j].symbol_id)
           return (
             <CellText
               key={`${cellData.cell.row}${cellData.cell.col}`}
               position={[-4.6 + cellData.cell.row / 2.5, -3.20 + cellData.cell.col / 2.5, 1]}
-              symbol={game?.fieldCells[i][j].symbol_id}
+              symbol={fieldCells[i][j].symbol_id}
               game={game}
-              cellId={game?.fieldCells[i][j].id}
+              cellId={fieldCells[i][j].id}
               slotId={null}
               attachedSymbolMesh={attachedSymbolMesh}
               attachSymbolMesh={attachSymbolMesh}
@@ -115,9 +234,12 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
       return (
         <Cell
           key={index}
+          editFieldCells={editFieldCells}
           positionX={1.9 + index / 2.5}
           positionY={-2}
           attachedMesh={attachedMesh}
+          attachedSymbolMesh={attachedSymbolMesh}
+          attachedPriceMesh={attachedPriceMesh}
           attachedSymbolId={attachedSymbolId}
           color='#442D70'
           cellId={null}
@@ -135,10 +257,12 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
   }
 
   const renderHandCells = () => {
-    const currentPlayer = lobby?.players.find((user) => {
-      return user?.player.login === login
-    })
-    const handSymbols : any = currentPlayer?.hand;
+    let handSymbols: any = null;
+    if(currentPlayer?.user_id === yourPlayer?.user_id)
+      handSymbols = currentPlayer?.hand;
+    else
+      handSymbols = yourPlayer?.hand;
+    console.log(handSymbols);
     return [1, 2, 3, 4, 5, 6, 7].map((row: any, index) => {
       if(handSymbols && handSymbols[`slot${row}`])
         return (

@@ -53,12 +53,6 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
           socket.emit('removeFromRoom', id)
           await getUserData();
         }  
-        else if(response.status === 422) {
-          // TODO
-        }
-        else if(response.status === 400) {
-          // TODO
-        }
       });
   }
 
@@ -72,12 +66,6 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
           socket.emit('removeRoom', lobby.invite_id)
           await getUserData();
         }  
-        else if(response.status === 422) {
-          // TODO
-        }
-        else if(response.status === 400) {
-          // TODO
-        }
       });
   }
 
@@ -129,12 +117,6 @@ const Lobby: FunctionComponent<LobbyProps> = (props) => {
         socket.emit('startGame', lobby.invite_id)
         startGame(true);
         beginStartGame(false);
-      }
-      else if(response.status === 422) {
-        // TODO
-      }
-      else if(response.status === 400) {
-        // TODO
       }
     });
   }

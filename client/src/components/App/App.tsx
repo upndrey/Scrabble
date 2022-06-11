@@ -10,7 +10,7 @@ import Menu from '../Menu/Menu';
 import StartGameButton from '../StartGameButton/StartGameButton';
 import Signup from '../Signup/Signup';
 import axios from 'axios';
-import { UserData } from '../../interfaces/UserData';
+import { FieldCell, UserData } from '../../interfaces/UserData';
 import { devData } from '../../features/devData';
 import {socket} from '../../features/socket';
 import { SERVER_IP } from '../../features/server';
@@ -30,30 +30,16 @@ function App() {
   const [inviteId, setInviteId] = React.useState<string>("");
 
   const getUserData = async () => {
-    // devCode
-    // console.log(devData);
-    // setLogin(devData.login);
-    // setLobby(devData.lobby);
-    // setGame(devData.game); 
-    // if(devData.login !== login) {
-    //   socket.emit('login', devData.login, socket.id)
-    // }
     await axios.post(SERVER_IP + '/api/user/getUserData', {withCredentials: true}).then((response) => {
       if(response.status === 200) {
         const json : UserData = response.data;
-        console.log(json);
         if(json.login !== login) {
           socket.emit('login', json.login, socket.id)
         }
         setLogin(json.login);
         setLobby(json.lobby);
         setGame(json.game);
-      }
-      else if(response.status === 422) {
-        // TODO
-      }
-      else if(response.status === 400) {
-        // TODO
+        console.log('getUserData activated');
       }
     });
   }

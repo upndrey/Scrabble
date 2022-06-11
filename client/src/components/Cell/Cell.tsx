@@ -7,6 +7,8 @@ import { SERVER_IP } from '../../features/server';
 
 interface CellProps {
   attachedMesh: THREE.Mesh,
+  attachedSymbolMesh: THREE.Mesh,
+  attachedPriceMesh: THREE.Mesh,
   attachedSymbolId: number,
   positionX: number,
   positionY: number,
@@ -19,13 +21,16 @@ interface CellProps {
   lobby: UserData['lobby'],
   setGetFromSlotId: Function,
   setGetFromCellId: Function,
-  setCell: Function
+  setCell: Function,
+  editFieldCells: Function
 }
 
 const Cell: FunctionComponent<CellProps> = (props) => {
   const {
     color, 
     attachedMesh, 
+    attachedSymbolMesh,
+    attachedPriceMesh,
     attachedSymbolId, 
     positionX, 
     positionY, 
@@ -37,7 +42,8 @@ const Cell: FunctionComponent<CellProps> = (props) => {
     lobby,
     setGetFromSlotId,
     setGetFromCellId,
-    setCell
+    setCell,
+    editFieldCells
   } = props;
   const meshRef = useRef<THREE.Mesh>(null!)
   const [hovered, setHover] = useState(false)
@@ -45,8 +51,18 @@ const Cell: FunctionComponent<CellProps> = (props) => {
   const handlePointerUp = async (e: ThreeEvent<PointerEvent>) => {
     if(!attachedSymbolId) 
       return;
+
     attachedMesh.position.x = e.object.position.x;
     attachedMesh.position.y = e.object.position.y;
+
+    attachedSymbolMesh.position.x = attachedMesh.position.x - .17;
+    attachedSymbolMesh.position.y = attachedMesh.position.y - .05;
+    attachedSymbolMesh.position.z = attachedMesh.position.z + .02;
+
+    attachedPriceMesh.position.x = attachedMesh.position.x + .07;
+    attachedPriceMesh.position.y = attachedMesh.position.y - .14;
+    attachedPriceMesh.position.z = attachedMesh.position.z + .02;
+
     if(cellId){
       if(getFromSlotId){
         await axios.post(SERVER_IP + '/api/game/removeSymbolInHand', {
@@ -64,7 +80,7 @@ const Cell: FunctionComponent<CellProps> = (props) => {
         cellId: cellId,
         symbolId: attachedSymbolId
       })
-      await getUserData();
+      editFieldCells(getFromCellId, cellId, getFromSlotId, slotId);
       setCell(true);
       socket.emit('gameMove', lobby?.invite_id)
     }
@@ -85,7 +101,7 @@ const Cell: FunctionComponent<CellProps> = (props) => {
         slot: slotId,
         symbolId: attachedSymbolId
       })
-      await getUserData();
+      editFieldCells(getFromCellId, cellId, getFromSlotId, slotId);
       setCell(true);
       socket.emit('gameMove', lobby?.invite_id)
     }

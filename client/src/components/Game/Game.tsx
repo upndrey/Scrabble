@@ -4,14 +4,14 @@ import axios from "axios";
 import { FunctionComponent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { socket } from "../../features/socket";
-import { UserData } from "../../interfaces/UserData";
+import { FieldCell, Player, UserData } from "../../interfaces/UserData";
 import Controls from "../Controls/Controls";
 import GameBgLayer from "../GameBgLayer/GameBgLayer";
 import { SERVER_IP } from '../../features/server';
 
 interface GameProps {
   userData: UserData,
-  getUserData: Function
+  getUserData: Function,
 }
  
 const Game: FunctionComponent<GameProps> = (props) => {
@@ -20,10 +20,16 @@ const Game: FunctionComponent<GameProps> = (props) => {
   const [controlsZIndex, setControlsZIndex] = useState<number>(1000)
   const [isGameEnded, setGameEnded] = useState<boolean>(false)
   const [attachedSymbolMesh, attachSymbolMesh] = useState<THREE.Mesh>(null!)
+  const [fieldCells, setFieldCells] = useState<FieldCell[][] | undefined>(null!);
+  const [currentPlayer, setCurrentPlayer] = useState<Player | null | undefined>(null!);
+  const [yourPlayer, setYourPlayer] = useState<Player | null | undefined>(null!);
   const navigate = useNavigate();
   useEffect(() => {
     if(!game)
       navigate('/'); 
+    findYourPlayer();
+    findCurrentPlayer();
+    setFieldCells(userData['game']?.fieldCells);
     if(lobby?.players) {
       const didGameEnded = lobby?.players.every((player) => {return player?.is_ended})
       if(didGameEnded) {
@@ -34,13 +40,20 @@ const Game: FunctionComponent<GameProps> = (props) => {
       setGameEnded(true);
     });
     socket.on('gameMove', async () => {
-      await getUserData();
+      await axios.post(SERVER_IP + '/api/game/getBoard', {withCredentials: true}).then((response) => {
+        if(response.status === 200) {
+          const json : FieldCell[][] = response.data;
+          console.log(json);
+        }
+      });
     });
     socket.on('nextTurn', async () => {
+      findCurrentPlayer();
       await getUserData();
     });
     socket.emit('room', lobby?.invite_id)
   }, []);
+
   const onControlsEnterHandler = () => {
     if(attachedSymbolMesh)
       setControlsZIndex(0);
@@ -74,7 +87,7 @@ const Game: FunctionComponent<GameProps> = (props) => {
       if(game && player)
         return player.slot === findSlotByTurn(game?.gameInfo.turn, lobby?.players.length)
     })
-    return currentPlayer
+    setCurrentPlayer(currentPlayer)
   }
 
   const findYourPlayer = () => {
@@ -82,10 +95,9 @@ const Game: FunctionComponent<GameProps> = (props) => {
       if(game && player)
         return login === player.player.login
     })
-    return yourPlayer
+    setYourPlayer(yourPlayer)
   }
   const isYourTurn = () => {
-    const currentPlayer = findCurrentPlayer();
     const didGameEnded = lobby?.players.every((player) => {return player?.is_ended})
     if(currentPlayer?.is_ended && !didGameEnded) {
       axios.post(SERVER_IP + '/api/nextTurn', {
@@ -95,12 +107,6 @@ const Game: FunctionComponent<GameProps> = (props) => {
           await getUserData();
           socket.emit('nextTurn', lobby?.invite_id)
         }
-        else if(response.status === 422) {
-          // TODO
-        }
-        else if(response.status === 400) {
-          // TODO
-        }
       });
       return false;
     }
@@ -108,7 +114,6 @@ const Game: FunctionComponent<GameProps> = (props) => {
   }
 
   const closeGameHandler = async () => {
-    const yourPlayer = findYourPlayer();
     await axios.post(SERVER_IP + '/api/game/exitGame', {
       user_id: yourPlayer?.user_id
     }).then(async (response) => {
@@ -138,6 +143,8 @@ const Game: FunctionComponent<GameProps> = (props) => {
     });
     return playerName;
   }
+
+  const isYourTurnFlag = isYourTurn();
 
   return (
     <>
@@ -196,9 +203,9 @@ const Game: FunctionComponent<GameProps> = (props) => {
           onControlsOutHandler={onControlsOutHandler}
           lobby={userData['lobby']}
           game={userData['game']}
-          isYourTurn={isYourTurn()}
-          currentPlayer={findCurrentPlayer()}
-          yourPlayer={findYourPlayer()}
+          isYourTurn={isYourTurnFlag}
+          currentPlayer={currentPlayer}
+          yourPlayer={yourPlayer}
           getUserData={getUserData}
         ></Controls>
       </Box>
@@ -217,7 +224,12 @@ const Game: FunctionComponent<GameProps> = (props) => {
           attachedSymbolMesh={attachedSymbolMesh}
           attachSymbolMesh={attachSymbolMesh}
           getUserData={getUserData}
-          isYourTurn={isYourTurn()}
+          fieldCells={fieldCells}
+          isYourTurn={isYourTurnFlag}
+          setFieldCells={setFieldCells}
+          yourPlayer={yourPlayer}
+          currentPlayer={currentPlayer}
+          setCurrentPlayer={setCurrentPlayer}
         />
       </Box> 
     </>
