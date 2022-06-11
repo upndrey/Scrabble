@@ -43,6 +43,7 @@ const Game: FunctionComponent<GameProps> = (props) => {
       await axios.post(SERVER_IP + '/api/game/getBoard', {withCredentials: true}).then((response) => {
         if(response.status === 200) {
           const json : FieldCell[][] = response.data;
+          setFieldCells(json);
           console.log(json);
         }
       });

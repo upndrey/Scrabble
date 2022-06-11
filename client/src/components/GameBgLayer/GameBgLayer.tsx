@@ -46,13 +46,24 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
   const [attachedSymbolId, attachSymbolId] = useState<number>(null!)
   const [attachedMesh, attachMesh] = useState<THREE.Mesh>(null!)
   const [attachedPriceMesh, attachPriceMesh] = useState<THREE.Mesh>(null!)
+
   const [mouseMoveAllowed, setMouseMoveAllowed] = useState<boolean>(false)
   const [isCellSeted, setCell] = useState<boolean>(false)
   const [getFromSlotId, setGetFromSlotId] = useState<number>(null!)
   const [getFromCellId, setGetFromCellId] = useState<number>(null!)
+  const [attachedMeshPos, setAttachedMeshPos] = useState<Array<number>>(null!)
 
   useEffect(() => {
     if(isCellSeted) {
+      attachedMesh.position.x = attachedMeshPos[0];
+      attachedMesh.position.y = attachedMeshPos[1];
+      attachedSymbolMesh.position.x = attachedMesh.position.x - .17;
+      attachedSymbolMesh.position.y = attachedMesh.position.y - .05;
+      attachedSymbolMesh.position.z = attachedMesh.position.z + .02;
+  
+      attachedPriceMesh.position.x = attachedMesh.position.x + .07;
+      attachedPriceMesh.position.y = attachedMesh.position.y - .14;
+      attachedPriceMesh.position.z = attachedMesh.position.z + .02;
       attachSymbolMesh(null!)
       attachMesh(null!)
       attachPriceMesh(null!)
@@ -61,7 +72,6 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
         setGetFromSlotId(null!)
       if(setGetFromCellId)
         setGetFromCellId(null!)
-      // setPointerDown(false);
       setCell(false);
     }
   })
@@ -72,6 +82,9 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
     fromSlot_id: number | null,
     toSlot_id: number | null
   ) => {
+    
+
+
     let from = {
       row: -1,
       col: -1,
@@ -118,11 +131,8 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
         slot: toSlot_id
       }
     
-      
-
     const tempFieldCells : FieldCell[][] = JSON.parse(JSON.stringify(fieldCells));
     const tempPlayer : Player = JSON.parse(JSON.stringify(currentPlayer));
-    console.log(from, to);
     if(from.row !== -1) {
       const savedCell: FieldCell = JSON.parse(JSON.stringify(tempFieldCells[from.row][from.col]));
       if(to.row !== -1) {
@@ -151,9 +161,10 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
         tempPlayer.hand['slot' + from.slot as keyof Player['hand']] = null;
       }
     }
-    console.log("temp", tempPlayer.hand);
+    
     setFieldCells(tempFieldCells);
     setCurrentPlayer(tempPlayer);
+
   }
 
   const onMouseMove = (e: ThreeEvent<PointerEvent>) => {
@@ -209,17 +220,14 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
               game={game}
               cellId={fieldCells[i][j].id}
               slotId={null}
-              attachedSymbolMesh={attachedSymbolMesh}
-              attachSymbolMesh={attachSymbolMesh}
               attachMesh={attachMesh}
+              attachSymbolMesh={attachSymbolMesh}
               attachPriceMesh={attachPriceMesh}
               attachSymbolId={attachSymbolId}
               setGetFromSlotId={null}
               setGetFromCellId={setGetFromCellId}
-              attachedSymbolId={attachedSymbolId}
               isYourTurn={isYourTurn}
-              setCell={setCell}
-              isCellSeted={isCellSeted}
+              setAttachedMeshPos={setAttachedMeshPos}
             />
           )
         else {
@@ -273,17 +281,14 @@ const GameBgLayer: FunctionComponent<GameBgLayerProps> = (props) => {
             game={game}
             cellId={null}
             slotId={row}
-            attachedSymbolMesh={attachedSymbolMesh}
-            attachSymbolMesh={attachSymbolMesh}
             attachMesh={attachMesh}
+            attachSymbolMesh={attachSymbolMesh}
             attachPriceMesh={attachPriceMesh}
             attachSymbolId={attachSymbolId}
             setGetFromSlotId={setGetFromSlotId}
             setGetFromCellId={null}
-            attachedSymbolId={attachedSymbolId}
             isYourTurn={isYourTurn}
-            setCell={setCell}
-            isCellSeted={isCellSeted}
+            setAttachedMeshPos={setAttachedMeshPos}
           />
         )
       else {

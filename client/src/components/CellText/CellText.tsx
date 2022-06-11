@@ -18,11 +18,8 @@ interface CellTextProps {
   setGetFromCellId: Function | null,
   cellId: number | null,
   slotId: number | null,
-  attachedSymbolMesh: THREE.Mesh,
-  attachedSymbolId: number,
   isYourTurn: boolean,
-  isCellSeted: boolean,
-  setCell: Function
+  setAttachedMeshPos: Function,
 }
 
 const CellText: FunctionComponent<CellTextProps> = (props) => {
@@ -38,10 +35,8 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
     slotId,
     attachMesh,
     attachPriceMesh,
-    attachedSymbolId,
     isYourTurn,
-    isCellSeted,
-    setCell
+    setAttachedMeshPos,
   } = props;
   const { viewport } = useThree()
   const meshRef = useRef<THREE.Mesh>(null!)
@@ -78,6 +73,7 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
       attachSymbolMesh(symbolMesh.current)
       attachMesh(meshRef.current)
       attachPriceMesh(priceMesh.current)
+      setAttachedMeshPos([meshRef.current.position.x, meshRef.current.position.y]);
       attachSymbolId(symbol)
       if(setGetFromSlotId)
         setGetFromSlotId(slotId)
@@ -87,11 +83,11 @@ const CellText: FunctionComponent<CellTextProps> = (props) => {
   }
 
   const handlePointerUp = (e: ThreeEvent<PointerEvent>) => {
+    
   }
   
   useEffect(() => {
-    if (meshRef === null) return;
-    if (meshRef.current === null) return;
+    if (!meshRef || !meshRef.current) return;
     const mesh: any = meshRef.current;
     const temp : any = position;
     meshRef.current.position.x = temp[0];
